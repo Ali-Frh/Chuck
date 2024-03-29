@@ -17,7 +17,11 @@ import {
 
 function Home() {
   return (
-      <h2>Suka </h2>
+      <>
+
+      {/* <h2>Suka </h2> */}
+      <Login />
+      </>
     );
   }
 

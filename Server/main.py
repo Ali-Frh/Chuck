@@ -14,6 +14,11 @@ def handle_message(msg):
     print('Message: ' + msg)
     emit('message', msg, broadcast=True)
 
+@socketio.on('auth')
+def login_handler(msg):
+    print('Message: ' + msg)
+    emit('message', msg, broadcast=True)
+
 if __name__ == '__main__':
     socketio.run(app)
         

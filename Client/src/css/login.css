@@ -1,0 +1,110 @@
+.logo {
+    width: 100%;
+    margin: -170px auto -80px auto ;
+    max-width: 400px;
+    display: block;
+}
+
+.whole-page {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: chocolate;
+}
+
+
+.card {
+    background-color: white;
+    min-width: 300px;
+    max-width: 500px;
+    width: 30%;
+    padding: 10px;
+    /* height: 50%; */
+    border-radius: 10px;
+    border: 2px solid rgb(160, 76, 16);
+    box-shadow: 1px 1px 3px rgb(160, 76, 16)
+    /* text-align: center; */
+}
+
+@media screen and (min-width: 501px) and (max-width: 800px) {
+    .card {
+        width: 70%;
+    }
+}
+
+@media screen and (min-width: 801px) and (max-width: 1300px) {
+    .card {
+        width: 50%;
+    }
+}
+
+@media screen and (max-width: 500px) {
+    .card {
+        width: 90%;
+    }
+}
+
+.mail {
+    width: 80%;
+    margin: 0 auto;
+    display: block;
+    border: 0;
+    font-weight: 600;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    border-bottom: 2px solid rgb(209, 122, 61);
+    outline: none;
+    padding: 0px 10px;
+    height: 30px;
+    position: relative;
+    font-size: 1rem;
+    /* border-radius: 10px; */
+    z-index: 2;
+    transition: all 100ms;
+}
+
+.mail:focus {
+    transition: all 100ms;
+    border-bottom: 4px solid chocolate;
+    /* border-radius: 10px;  */
+    margin-bottom: -2px;
+    /* padding: 0; */
+}
+
+.slogan {
+    text-align: center;
+}
+
+.next {
+    background-color: chocolate;
+    /* text-align: center; */
+    margin: 20px auto;
+    /* padding: 10px; */
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1.2rem;
+    border: 2px solid chocolate;
+
+    height: 50px;
+    width: 85%;
+    outline: none;
+    display: block;
+    font-weight: 700;
+    transition: all 0.5s;
+}
+
+.next:hover {
+    transition: all 0.5s;
+    background: rgb(250, 216, 191);
+    color: chocolate;
+    border: 2px solid chocolate;
+}
+
+/* No
+
+use air baloon quotes downward 
+
+
+*/
