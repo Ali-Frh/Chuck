@@ -5,6 +5,28 @@
     display: block;
 }
 
+.log-in {
+    display: none;
+    position: relative;
+}
+
+
+.show {
+    display: block !important;
+}
+.fadeout {
+    opacity: 0;
+    transition: opacity 2s linear;
+}
+
+.password {
+    margin-top: 14px !important;
+    /* transition: ; */
+    
+}
+
+
+
 .whole-page {
     width: 100vw;
     height: 100vh;
@@ -12,6 +34,7 @@
     align-items: center;
     justify-content: center;
     background: chocolate;
+    user-select: none;
 }
 
 
@@ -72,7 +95,36 @@
     margin-bottom: -2px;
     /* padding: 0; */
 }
+.mail-holder {
+    position: relative;
+    }
+    
+    .edit {
+        display: none;
+    position: absolute;
+    right: 10%;
+    top: 4px;
+    z-index: 2;
+    cursor: pointer;
+    color: chocolate;
+    font-weight: 600;
+    }
 
+    .forgoot {
+        font-size: 0.9rem;
+        color: chocolate;
+        font-weight: 600;
+        display: block;
+        margin: -12px 0 0 0;
+        cursor: pointer;
+        text-align: center;
+        opacity: 0.8;
+        }
+        
+        .forgoot:hover { 
+         opacity: 1;
+        }
+    
 .slogan {
     text-align: center;
 }
@@ -106,5 +158,25 @@
 
 use air baloon quotes downward 
 
+make chuck resize then maybe hide in hole when molests
 
 */
+
+.logo-wrapp {
+    position: relative;
+    }
+    
+    .baloon {
+        display: none;
+    position: absolute;
+    right: 40px;
+    background: rgb(221, 155, 109);
+    # opacity: 0.5;
+    width: 150px;
+    top: 250px;
+    border-radius: 0 120px 120px 120px;
+    border: 2px dashed chocolate;
+    padding: 10px;
+    font-weight: 700;
+    font-family: segoe ui;
+     }
