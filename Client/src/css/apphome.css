@@ -1,0 +1,248 @@
+.chatroom {
+    width: 100vw;
+    /* display: grid; */
+    /* grid-template-columns: 6fr 6fr; */
+}
+
+
+.chats-list  {
+}
+
+.chat-item {
+    height: 80px;
+    /* display: grid; */
+    display: flex;
+    align-items:center;
+    gap: 2px;
+    grid-template-columns: 3fr 9fr;
+    padding-left: 15px;
+}
+
+.chat-item {
+  border-bottom: 1px solid #e4e4e4;
+}
+
+.chat-item > img {
+ width: 50px;
+  height: 50px;
+  border-radius: 10px !important;
+  object-fit: cover;
+  /* padding-left: 10px; */
+  /* padding-right: 0px; */
+}
+
+.list-box {
+overflow-y: scroll;
+height: calc( 100vh - 65px);
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.chat-item > .right {
+    height: 60%;
+    padding-left: 10px; 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.chat-item:hover {
+  background: rgba(1,1,1,0.1);
+  cursor: pointer;
+  user-select: none;
+}
+
+.chat-item:active {
+  background-color: rgba(1,1,1,0.2);
+}
+
+.chat-area {
+  width: 100%;
+  background: pink
+  /* displ */
+}
+
+.yeaah {
+  background-color: rgba(252, 138, 56, 0.719);
+}
+
+body {
+  display: block !important;
+}
+
+div::-webkit-scrollbar, textarea::-webkit-scrollbar {
+  /* margin-left: -10px; */
+  /* opacity: 50%; */
+  width: 10px;               /* width of the entire scrollbar */
+}
+
+div::-webkit-scrollbar-track, textarea::-webkit-scrollbar-track {
+  /* margin-left: 10px; */
+  /* opacity: 0.5; */
+  background: rgba(252, 138, 56, 0.384);        /* color of the tracking area */
+}
+
+
+div::-webkit-scrollbar-track:hover, textarea::-webkit-scrollbar-track:hover {
+  /* margin-left: 10px; */
+  /* opacity: 0.5; */
+  background: rgba(252, 138, 56, 0.719);        /* color of the tracking area */
+}
+
+div::-webkit-scrollbar-thumb, textarea::-webkit-scrollbar-thumb {
+  background-color: rgba(210, 105, 30, 0.377);    /* color of the scroll thumb */
+  border-radius: 10px;       /* roundness of the scroll thumb */
+  /* border: 3px solid chocolate;  creates padding around scroll thumb */
+}
+
+div::-webkit-scrollbar-thumb:hover, textarea::-webkit-scrollbar-thumb:hover {
+  cursor: move;
+  background-color: chocolate;    /* color of the scroll thumb */
+  border-radius: 10px;       /* roundness of the scroll thumb */
+  /* border: 3px solid chocolate;  creates padding around scroll thumb */
+}
+
+
+.bar {
+  height: 65px;
+  background: chocolate;
+  width: calc( 100% - 0px)  ;
+  /* border-right: 10px solid #FDAB71; */
+}
+
+.bar > .west {
+  align-items: center;
+  padding-left: 10px;
+
+  padding-top:10px; 
+}
+
+.bar > .west > svg {
+  height: 40px;
+
+}
+
+.bar > .west > img {
+  width: 70px;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+}
+
+.bar > span {
+  display: block;
+  text-align: center;
+  width: calc( 100% - 100px);
+  font-size: 1.27rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 600;
+}
+
+.top-bar {
+  height: 65px;
+  background-color: #FDAB71;
+  /* box-shadow: black; */
+  padding-left: 10px;
+  align-items: center;
+  display: flex;
+  box-shadow: 1px 10px black;
+}
+
+.top-bar > img {
+  width: 50px;
+  border-radius: 500px;
+}
+
+
+
+.top-bar > .namebox {
+  display: flex;
+  flex-direction: column;
+  padding-left: 14px;
+}
+
+.top-bar > .namebox > .recipient {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* padding-left: 10px; */
+  font-weight: 700;
+  /* font-size: 0.8rem; */
+}
+
+.top-bar > .namebox > .suka { 
+  font-size: 0.8rem;
+}
+.chat-stage {
+  background-color: #fabd92;
+  height: calc(100% - 65px);
+  display: flex;
+  /* flex-direction: column; */
+  flex-direction: column;
+  padding: 10px 0 10px 0 !important;
+}
+
+.messages {
+  /* background: white; */
+  height: calc( 90%);
+}
+
+.sendarea {
+  /* background: blue; */
+  background-color: #FDAB71;
+  height: calc(10%);
+  min-height: 54px;
+  display:flex ;
+  justify-content: space-between;
+  padding: 12px 20px 16px 20px;
+}
+
+
+
+.textbox {
+  position: relative;
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sendarea > .textbox > textarea {
+  width: calc( 100% - 140px);
+  height: 40px;
+  border-radius: 10px;
+  outline: none;
+  background-color: #ffefd6;
+  padding: 10px;
+  direction: auto;
+  font-size: 1rem;
+  resize: none;
+  
+}
+
+.textbox > button > svg {
+  color: black;
+  width: 30px;
+}
+
+.textbox > button {
+  height:45px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding:0;
+  width: 50px;
+  /* position: absolute; */
+  /* top: 0; */
+  /* right: 0; */
+  opacity: 0.8;
+}
+
+.textbox > button:hover {
+  opacity: 1;
+} 

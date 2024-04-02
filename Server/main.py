@@ -4,6 +4,14 @@ from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO, emit
 import sqlite3, time
 
+import smtplib
+import secrets
+import string
+
+def generate_random_token(length):
+    alphabet = string.ascii_letters + string.digits
+    token = ''.join(secrets.choice(alphabet) for _ in range(length))
+    return token
 db = []
 
 def db_init(): 
@@ -25,6 +33,8 @@ def db_init():
               avatar TEXT
               
               )''')
+    t = conn.cursor()
+    t.execute("CREATE TABLE IF NOT EXISTS tokens(token TEXT, ip TEXT, uid INTEGER, device TEXT, last_active INTEGER);")
     current_unix_time = int(time.time())
 
     # c.execute(f'''INSERT INTO users VALUES(
@@ -51,6 +61,38 @@ def db_connection():
     return conn 
     # conn.close()
 
+
+def send_mail(data):
+    
+
+    with smtplib.SMTP("sandbox.smtp.mailtrap.io", 2525) as server:
+        server.login("4bde487839cb76", "********4888")
+        server.sendmail(data["sender"], data["receiver"], data["message"])
+        return True
+
+def token_helper_logged_in(uid,device , ip):
+    with  sqlite3.connect("data.db") as conn:
+        token = generate_random_token(24)
+        ti = int( time.time( ) )
+        c = conn.cursor() 
+        c.execute(f"INSERT INTO tokens VALUES ('{ token }', '{ip}', '{ uid }', '{ device }',  '{ ti }')")
+        conn.commit()
+        return token
+
+def token_helper_verify(token): 
+    # pube = 0
+    with     sqlite3.connect("data.db") as conn:
+        # token = generate_random_token(24)
+        #ti = int( time.time( ) )
+        c = conn.cursor() 
+        c.execute(f"SELECT uid FROM tokens WHERE token='{ token }'")
+        # conn.commit()
+        try:
+            pube = (c.fetchone()[0])
+        except:
+            pube = 0
+    # if pube 
+    return pube
 
 app = Flask(__name__)
 
@@ -104,11 +146,13 @@ def authentication_login():
         password = request.get_json()["password"] 
         hash =  hashlib.md5(password.encode()).hexdigest()
         # print()
-        c.execute(f"SELECT * FROM users WHERE password='{hash}' AND username='{payload}' or mail='{payload}';")
+        c.execute(f"SELECT uid FROM users WHERE password='{hash}' AND username='{payload}' or mail='{payload}';")
         res= c.fetchall()
         if len(res) == 0:
             return "wrong"
         else:
+            # print(res[0])
+            return token_helper_logged_in(res[0][0], "Chuck Web v1.0", request.remote_addr)
             return "true buddy"
     return "failure", 500
 
@@ -116,6 +160,10 @@ if __name__ == '__main__':
     db_init() #move it to later func 
     db = db_connection()
     print("Starting websocket server")
+    # token_helper_logged_in("1", "Your Moms Phone", "1.2.3.4")
+    # print(
+        # token_helper_verify("8aFc1T8LALi9aF0JgdmusjwI")
+    # ,"", token_helper_verify("12") )
     socket.run(app, allow_unsafe_werkzeug=True)
         
 # from flask import Flask, render_template

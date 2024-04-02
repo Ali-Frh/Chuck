@@ -43,10 +43,11 @@ function Login() {
         password: PassBox.current.value
     }).then((response)=> {
       console.log(response.data)
-      if (response.data == "login") {
-          
+      if (response.data == "wrong") {
+        alert("Wrong Pass")
       } else {
-
+        localStorage.setItem("token", response.data)
+        window.location.reload()
       }
     }).catch(()=>{
       console. log("Fuxk")
@@ -128,7 +129,7 @@ function Login() {
             </div>
 
             <div className="log-in" ref={LoginElement}>
-              <input ref={PassBox} type="password" onChange="" placeholder="Password" className="mail password" />
+              <input ref={PassBox} type="password" placeholder="Password" className="mail password" />
               <i ref={ShowHide} onClick={(e) => ShowHideFunc(e)} class="show edit">Show</i>
               <button className="next login" onClick={LoginHandler}>Login</button>
               <i className="forgoot">i'm so silly that i forgot my password</i>

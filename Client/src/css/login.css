@@ -1,7 +1,7 @@
 .logo {
-    width: 100%;
-    margin: -170px auto -80px auto ;
-    max-width: 400px;
+    width: 70%;
+    margin: -70px auto 40px auto ;
+    max-width: 300px;
     display: block;
 }
 
@@ -171,12 +171,14 @@ make chuck resize then maybe hide in hole when molests
     position: absolute;
     right: 40px;
     background: rgb(221, 155, 109);
-    # opacity: 0.5;
+    /* # opacity: 0.5; */
     width: 150px;
-    top: 250px;
+    top: 150px;
     border-radius: 0 120px 120px 120px;
     border: 2px dashed chocolate;
     padding: 10px;
     font-weight: 700;
     font-family: segoe ui;
      }
+
+     

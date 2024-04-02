@@ -6,6 +6,8 @@ import { ChakraProvider } from "@chakra-ui/react"
 import { Input, Stack } from '@chakra-ui/react'
 
 import Login from "./Login.jsx"
+import AppHome from "./AppHome.jsx"
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -13,16 +15,27 @@ import {
   Link
 } from "react-router-dom";
 
+// window.test = "Fuck";
 
 
 function Home() {
-  return (
+  const token = localStorage.getItem("token");
+  // console.log(token == null)
+  if (token == null) {
+
+    return (
       <>
 
       {/* <h2>Suka </h2> */}
+      
       <Login />
       </>
     );
+  } else {
+    return (
+      <AppHome />
+    )
+  }
   }
 
 
