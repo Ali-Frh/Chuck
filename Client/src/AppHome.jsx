@@ -21,6 +21,10 @@ const AppHome = () => {
     const [lastOnline, setLastOnline] = useState("....");
     const [avatar, setAvatar] = useState(dude);
     const [chat_id, setChat_id] = useState(0); 
+
+    const [Messages, setMessages] = useState({}) 
+    // const MessagesArea = 
+
     
     useEffect(() => {
 
@@ -50,13 +54,23 @@ const AppHome = () => {
             setChat_id(data["chat_id"]);
             // setAvatar(data["avatar"])
             console.log(data);
-            getMessages("none");
+            
 
         }
     
         function loadMessages (data) {
             data = JSON.parse(data)
             console.log(data )
+            // const vale = {5: "suka"}
+            // const val = {chat_id:data["messages"]}
+            // const id = "chat_" + data["chat_id"];
+            // const chts = data["messages"];
+
+            // setMessages({id:[chts]})
+            // window.mess = Messages;
+            // setMessages(prev => [...prev, val]);
+            // Messages[5] = data["messages"];
+            console.log(Messages);
         } 
 
         function onFooEvent(value) {
@@ -99,9 +113,10 @@ const AppHome = () => {
         textBox.current.value = "";
     }
     
-    const getMessages =  (offset) => {
+    const getMessages =  (chat_id, offset) => {
         // alert("ha");
         //   console.log (textBox.current.value);
+        console.log(chat_id+"=>"+offset)
         const data = {
             "chat_id": chat_id,
             "offset": offset,
@@ -116,7 +131,7 @@ const AppHome = () => {
     const openChat = (e) => {
         console.log ("calld",e.target.id )
         socket.emit("openChat", e.target.id);
-
+        getMessages(e.target.id, "none");
         
     }
 
@@ -147,7 +162,26 @@ const AppHome = () => {
         </div>
     );
     
-    
+    const MessagesList = () => (
+        <div>
+            Meow {chat_id}
+            
+
+            { Messages}
+            {window.mess = Messages}
+            {/* {Object.keys(Messages[chat_id]).map(message => ( */}
+                
+                {/* {message} */}
+                {/* // <ChatItem */}
+                    {/* // key={chatId} */}
+                    {/* // chat={chats[chatId ]} */}
+                    {/* // /> */}
+                
+                
+            {/* // ))} */}
+            {/* { (chats) } */}
+        </div>
+    );
     
     const [inChat, setInChat] = useState( !true ) 
     return (
@@ -219,10 +253,14 @@ const AppHome = () => {
                         </div>
                     </div> 
                     <div className="chat-stage">
-                        <div className="messages">
+                        <button onClick={()=> {
+                            // Messages.current.appendChild(<Message mid={2} from_user={1} to_user={1}
+                                // type={"text"} value={"sukw"} time={0} />);
+                        }}>test</button>
+                        <div className="messages" >
                             
-                            
-                            <Message mid={1} from_user={1} to_user={1} type={"text"} value={"Hey Koni!"} time={1712077050} />
+                            <MessagesList />
+                            {/* <Message mid={1} from_user={1} to_user={1} type={"text"} value={"Hey Koni!"} time={1712077050} />
                             <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
                             <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
                             <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
@@ -241,7 +279,7 @@ const AppHome = () => {
                             <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
                             <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Last Salam Dada !"} time={1712077051} />
                         
-                        
+                         */}
                         </div>
 
                         <div className="sendarea">
