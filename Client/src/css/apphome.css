@@ -243,6 +243,55 @@ div::-webkit-scrollbar-thumb:hover, textarea::-webkit-scrollbar-thumb:hover {
   opacity: 0.8;
 }
 
+
+.indic {
+  position: absolute;
+  left: 5px; 
+  top: 5px;
+  border-radius: 100px;
+  width: 10px;
+  height: 10px;
+  color: rgba(0, 0, 0, 0);
+}
+
+.green {
+
+  background-color: green;
+}
+
+.red {
+  background-color: red ;
+}
+
+.active {
+  background: rgba(1,1,1,0.1);
+}
+
 .textbox > button:hover {
   opacity: 1;
 } 
+
+.add-friend {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  background-color: chocolate;
+  color: white;
+  box-shadow: 1px 1px 4px black;
+  border-radius: 500px;
+  width: 50px;
+  height: 50px ;
+  font-size: 2rem;
+  padding: 0;
+  text-align: center;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 7px;
+  outline: none !important;
+
+}
+
+.add-friend:active {
+  background: rgb(153, 74, 18)
+}

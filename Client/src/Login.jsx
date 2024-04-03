@@ -46,7 +46,8 @@ function Login() {
       if (response.data == "wrong") {
         alert("Wrong Pass")
       } else {
-        localStorage.setItem("token", response.data)
+        localStorage.setItem("token", response.data.split(":")[1])
+        localStorage.setItem("uid", response.data.split(":")[0])
         window.location.reload()
       }
     }).catch(()=>{

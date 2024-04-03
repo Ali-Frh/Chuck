@@ -1,7 +1,7 @@
 from flask import Flask, request
 # Needed for localhost testing.
 from flask_cors import CORS, cross_origin
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, join_room, leave_room
 import sqlite3, time
 
 import smtplib
@@ -35,6 +35,33 @@ def db_init():
               )''')
     t = conn.cursor()
     t.execute("CREATE TABLE IF NOT EXISTS tokens(token TEXT, ip TEXT, uid INTEGER, device TEXT, last_active INTEGER);")
+    
+    p = conn.cursor()
+    p.execute("""
+        Create Table if not exists messages(
+              mid integer,
+              chat_id integer,
+              replied_to integer,
+              type text,
+              value text,
+              send_at integer,
+              edited text,
+              deleted text 
+
+        )
+"""
+    )
+
+    a = conn.cursor()
+    a.execute("""
+              Create Table If not exists chats (
+                id Integer,
+               uid integer, 
+              chat_id integer,  
+              last_message  integer 
+              )
+              """)
+    
     current_unix_time = int(time.time())
 
     # c.execute(f'''INSERT INTO users VALUES(
@@ -104,11 +131,131 @@ socket = SocketIO(app, cors_allowed_origins="*")
 # For localhost testing.
 CORS(app)
 
+online_users = {}
+conn_to_uid = {}
 
 @socket.on('connect')
 def test_connect():
+    auth= request.headers.get('Authorization')
+# , request.sid)
+    
+    uid= (token_helper_verify(auth))
+    if uid == 0:
+        # emit()
+        return 
+    online_users[uid] = request.sid
+    conn_to_uid[request.sid ]=  uid  
+    print("User", uid, "is Online.")
     emit('custom-server-msg',
          {'data': 'Print this out via data.data in your client'})
+
+#  @socket.on("query")
+# def query_user(user):
+    # print("hah")
+
+import  json
+
+def get_user_meta(uid):
+    with sqlite3.connect("data.db") as conn:
+        c = conn.cursor(        )
+        c.execute("Select uid,name,username,avatar,last_seen from users where uid='"+str(uid)+"';" )
+        return c.fetchall()
+
+@socket.on("sendMessage")
+def send(data):
+    with sqlite3.connect("data.db") as conn:
+        sq = conn.cursor()
+        data = json.loads(data)
+        sq.execute(f"""
+                   INSERT INTO messages(chat_id, type, fromuser, value, send_at) VALUES(
+                   "{data["chat_id"]}", 
+                "{ data["type"]}",
+                   {str(conn_to_uid[request.sid])}, 
+                 "{data["value"]}",
+                   {int(time.time() )}) """)
+        print("hah", data)
+
+        conn.commit()
+
+        print("="*10,"\n" , online_users)
+        
+        if int( data["chat_id"]     ) in  online_users:
+            print("yeah")
+            emit("incomingMsg", json.dumps({"chat_id":conn_to_uid[request.sid], "type": data["type"] , "value": data["value"], "send_at":     int(time.time())}), 
+                                           room=online_users[int( data["chat_id"]         )])
+        # fresh = get_user_meta(conn_to_uid[request.sid]) [0]
+        # dat = {int(conn_to_uid[request.sid]):{
+        # dat = [{
+            # "chat_id": conn_to_uid[request.sid],
+
+@socket.on("getMessages")
+def get_mess(data):
+    data = json.loads(data)
+    user = conn_to_uid[request.sid]
+    peer = data["chat_id"]
+# offset buddy
+    with sqlite3.connect("data.db") as conn:
+        sq = conn.cursor()
+        sq.execute(f"""
+    Select fromuser, type, value, send_at, replied_to, edited FROM messages WHERE (chat_id='{user}' AND fromuser ='{peer}') OR 
+        (chat_id='{peer}' AND fromuser='{user}') ORDER BY send_at DESC;                   
+ """)
+        # print("hah", data)
+        r = sq.fetchall()
+        
+        r = {"chat_id": peer, "messages": r}
+        
+        
+        emit("getMessages", json.dumps (
+        r      ))
+
+@socket.on("get_chats")
+def get_chats(data):
+    with sqlite3.connect("data.db") as conn:
+        sq = conn.cursor()
+        sq.execute("SELECT chat_id,last_message FROM chats WHERE uid='"+str(conn_to_uid[request.sid])+"' ORDER BY last_message DESC")
+        # print("hah", data)
+        fresh = get_user_meta(conn_to_uid[request.sid]) [0]
+        # dat = {int(conn_to_uid[request.sid]):{
+        dat = [{
+            "chat_id": conn_to_uid[request.sid],
+            "last_message": "0",
+            "name": "Saved Messages ",
+            "username":fresh[2],
+            "avatar":"null"
+        }]
+        data = sq.fetchall()
+        # z = 1
+        for da in data:
+            fresh = get_user_meta(da[0]) [0]
+            ar = {}
+            ar["chat_id"] = da[0]
+            ar["last_message"] = da[1]
+            ar["name"] = fresh[1]
+            ar["username"] = fresh[2]
+            ar["avatar"] = fresh[3]
+            dat.append( ar)
+            # dat[da[0]]= ar
+            # z = z +1
+        emit("get_chats", json.dumps(dat)) 
+
+        # emit("get_chats",json.dumps(
+
+
+@socket.on("openChat")
+def get_meta(uid):
+    fresh=  get_user_meta(uid) [0]
+    # fresh = get_user_meta(da[0]) [0]
+    ar = {}
+    ar["chat_id"] = uid
+    ar["last_message"] = 0
+    ar["name"] = fresh[1]
+    ar["username"] = fresh[2]
+    ar["avatar"] = fresh[3]
+    ar["last_online"] = fresh[4]
+    # dat.append( ar)
+    emit("openChat", json.dumps(ar))
+
 
 @app.route("/auth",methods=['GET', 'POST'] ) 
 def authentication():
@@ -152,9 +299,25 @@ def authentication_login():
             return "wrong"
         else:
             # print(res[0])
-            return token_helper_logged_in(res[0][0], "Chuck Web v1.0", request.remote_addr)
+            return str( res[0][0] ) +":"+token_helper_logged_in(res[0][0], "Chuck Web v1.0", request.remote_addr)
             return "true buddy"
     return "failure", 500
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    with sqlite3.connect("data.db") as conn:
+        c = conn.cursor()
+        token = request.get_json()["token"]
+        c.execute(f"DELETE FROM tokens WHERE token='{token}';")
+        # res= c.fetchall()
+        conn.commit()
+    return "logged out"
+        # if len(res) == 0:
+            # return "wrong"
+        # else:
+            # print(res[0])
+            # return token_helper_logged_in(res[0][0], "Chuck Web v1.0", request.remote_addr)
+            # return "true buddy"
 
 if __name__ == '__main__':
     db_init() #move it to later func 

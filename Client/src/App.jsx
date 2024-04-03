@@ -14,7 +14,7 @@ import {
   Route,
   Link
 } from "react-router-dom";
-
+import axios from "axios"
 // window.test = "Fuck";
 
 
@@ -39,6 +39,19 @@ function Home() {
   }
 
 
+const Logout = () => {
+  axios.post("http://127.0.0.1:5000/logout", {token: localStorage.getItem("token")}).then((response) => {
+    console.log( response.data)
+    localStorage.removeItem("token")
+  }).catch(()=> {
+    console.log("we fckd")
+  });
+  return (
+    "done"
+    
+  )
+}
+
 function App() {
   // const [count, setCount] = useState(0)
 
@@ -49,6 +62,7 @@ function App() {
           
           <Route path="/" element={ <Home /> } />
           
+          <Route path="/logout" element={ <Logout /> } />
         </Routes>
       </Router>
     </>
