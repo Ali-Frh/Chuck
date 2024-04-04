@@ -21,9 +21,47 @@ const AppHome = () => {
     const [lastOnline, setLastOnline] = useState("....");
     const [avatar, setAvatar] = useState(dude);
     const [chat_id, setChat_id] = useState(0); 
+    const messagesEndRef = useRef(null);
+    const [currentMessages, setCurrentMessages] = useState([])
+    const [atButt, setAtButt] = useState(false);
+    const scrollToBottom = () => {
+        if (messagesEndRef.current) {
+                // const element = messagesEndRef.current;
+                document.getElementsByClassName("messages")[0] .scrollBy(0, 9999999);
+                // console.log("cyka") 
+              }
+            
+        };
+          
 
-    const [Messages, setMessages] = useState(); 
-    const [Talks, setTalks] = useState("");
+      useEffect(() => {
+        if (atButt) {
+            scrollToBottom();
+        }
+      }, [currentMessages]); // Scroll to bottom whenever currentMessages change
+    
+
+      const handleScroll = (event) => {
+        const { scrollTop, scrollHeight, clientHeight } = event.target;
+        const atBottom = scrollHeight - scrollTop === clientHeight;
+        if (atBottom) {
+            setAtButt(true);
+            console.log("at butt")
+          // User is at the bottom
+          // Disable autoscroll
+          // Optionally, you could add a state to control autoscrolling
+        } else {
+            setAtButt(!true);
+            console.log("is not")
+          // User is not at the bottom
+          // Enable autoscroll
+          // scrollToBottom();
+        }
+      };
+
+
+    const [Messages, setMessages] = useState({}); 
+    // const [Talks, setTalks] = useState("");
     // const MessagesArea = 
 
     
@@ -39,47 +77,9 @@ const AppHome = () => {
           setIsConnected(false);
         }
 
-        function onGetChats(value) {
-            // setChats(value);
-            const parsedChats = JSON.parse(value);
-            setChats(parsedChats);
-
-            console.log(value);
-        }
-
-        function openChatBlyat(data) {
-            data = JSON.parse(data);
-            setInChat(true);
-            setCurrentRecipient(data["name"]);
-            setLastOnline(data["last_online"])
-            setChat_id(data["chat_id"]);
-            // setAvatar(data["avatar"])
-            console.log(data);
-            
-
-        }
+        
     
-        function loadMessages (data) {
-            data = JSON.parse(data)
-            console.log(data )
-            // const vale = {5: "suka"}
-            // const val = {chat_id:data["messages"]}
-            const id = "chat_" + data["chat_id"];
-            // const chts = data["messages"];
-
-            const e = {}
-            e[id] = data["messages"];
-            // const s = {"test":"suka"}
-
-
-            setMessages(prev=> ({ ...prev,  ...e}));
-
-            // window.mess = Messages;
-            // setMessages(prev => [...prev, val]);
-            // Messages[5] = data["messages"];
-            // console.log(Messages);
-            // console.log(e);
-        } 
+        
 
         function onFooEvent(value) {
           setFooEvents(previous => [...previous, value]);
@@ -103,7 +103,62 @@ const AppHome = () => {
     }, []);
     // setMessages("Salam");
 
+    function onGetChats(value) {
+        // setChats(value);
+        const parsedChats = JSON.parse(value);
+        setChats(parsedChats);
 
+        console.log(value);
+    }
+
+    function openChatBlyat(data) {
+        data = JSON.parse(data);
+        setInChat(true);
+        setCurrentRecipient(data["name"]);
+        setLastOnline(data["last_online"])
+        setChat_id(data["chat_id"]);
+        // setAvatar(data["avatar"])
+        // console.log(data);
+        // console.log("called")
+        setCurrentMessages([]);
+
+    }
+
+    function loadMessages (data) {
+        data = JSON.parse(data)
+        console.log("called")
+        // const vale = {5: "suka"}
+        // const val = {chat_id:data["messages"]}
+        const id = "chat_" + data["chat_id"];
+        // const chts = data["messages"];
+
+        const e = {}
+        e[id] = data["messages"];
+        // const s = {"test":"suka"}
+
+        const d = data["messages"];
+        
+        if (currentMessages == d) {
+            console.log("condom"); 
+        } else {
+
+            setMessages(prev=> ({ ...prev,  ...e}));
+            setCurrentMessages(prev => {
+                // Filter out elements from d that are already present in prev
+                const filteredD = d.filter(newMessage => !prev.some(existingMessage => existingMessage[3] === newMessage[3]));
+              
+                // Update state by combining prev and filteredD
+                return [...prev, ...filteredD];
+              });
+              
+            // setCurrentMessages(prev => ([...prev, ...d]));
+        }
+        // window.mess = Messages;
+        // setMessages(prev => [...prev, val]);
+        // Messages[5] = data["messages"];
+        // console.log(Messages);
+        // console.log(e);
+    } 
     
     const textBox = useRef();
     
@@ -124,14 +179,7 @@ const AppHome = () => {
     const getMessages =  (chat_id, offset) => {
         // alert("ha");
         //   console.log (textBox.current.value);
-        console.log(chat_id+"=>"+offset)
-        const data = {
-            "chat_id": chat_id,
-            "offset": offset,
-            // "value": textBox.current.value
-        }
         
-        socket.emit("getMessages", JSON.stringify(data));
 
         // textBox.current.value =  "";
     }
@@ -139,7 +187,15 @@ const AppHome = () => {
     const openChat = (e) => {
         console.log ("calld",e.target.id )
         socket.emit("openChat", e.target.id);
-        getMessages(e.target.id, "none");
+        // getMessages(e.target.id, "none");
+        // console.log(chat_id+"=>"+offset)
+        const data = {
+            "chat_id": e.target.id,
+            "offset": "none",
+            // "value": textBox.current.value
+        }
+        
+        socket.emit("getMessages", JSON.stringify(data));
         
     }
 
@@ -171,15 +227,27 @@ const AppHome = () => {
     );
     
     const MessagesList = () => (
-        <div>
-            Meow {chat_id}
+        <>
+            {/* Meow {chat_id} */}
+            
+            {console.log( currentMessages)}
+            {currentMessages.slice().reverse() .map((message, index) => (
+                // <div key={index}>{message[2]}</div>
+                <Message mid={0} from_user={message[0]} to_user={chat_id} type={message[1]} value ={message[2]} 
+                time =       {message[3]} />
+                
+            ))}
+                {/* <Message mid={1} from_user={1} to_user={1} type={"text"} value={"Hey Koni!!!!!!!!!!!!!!!!!!!"} time={1712077050} /> */}
+
+
+                    
             
 
             
-        </div>
+        </>
     );
     
-    const [inChat, setInChat] = useState( true ) 
+    const [inChat, setInChat] = useState( !true ) 
     return (
         
 
@@ -189,14 +257,14 @@ const AppHome = () => {
         
         <PanelGroup className="chatroom" autoSaveId="example" direction="horizontal">
             <Panel defaultSize={25} maxSize={50} minSize={8}>
-                    <button onClick={()=> {
+                    {/* <button onClick={()=> {
                                 // setTalks("Salam");
                                 // setMessages({"1":["howdy","suka"]})
                                 console.log(Messages);
 
                             // Messages.current.appendChild(<Message mid={2} from_user={1} to_user={1}
                                 // type={"text"} value={"sukw"} time={0} />);
-                        }}>test</button>
+                        }}>test</button> */}
              
                 <span className={`indic ${isConnected ? "green" : "red"}` }>.</span>
                 <button className="add-friend">+ </button>
@@ -257,34 +325,18 @@ const AppHome = () => {
                         </div>
                     </div> 
                     <div className="chat-stage">
-                        <button onClick={()=> {
-                                setTalks("Salam");
-                                console.log(Talks);
-
+                        <button style={{position: "absolute", top:0, right:0}} onClick={()=> {
+                            setCurrentMessages(prev=> ([...prev, ...prev]));
                             // Messages.current.appendChild(<Message mid={2} from_user={1} to_user={1}
                                 // type={"text"} value={"sukw"} time={0} />);
                         }}>test</button>
-                        <div className="messages" >
+                        <div className="messages" onScroll={handleScroll} >
                             
-                            {/* <MessagesList /> */}
-                            {/* <Message mid={1} from_user={1} to_user={1} type={"text"} value={"Hey Koni!"} time={1712077050} />
+                            <MessagesList />
+
+                            <div ref={messagesEndRef} />
+                            {/* 
                             <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
-                            <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
-                            <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
-                            <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
-                            <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
-                            <Message mid={1} from_user={1} to_user={1} type={"text"} value={"Hey Koni!"} time={1712077050} />
-                            <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
-                            <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
-                            <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
-                            <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
-                            <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
-                            <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
-                            <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
-                            <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
-                            <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
-                            <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
-                            <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Last Salam Dada !"} time={1712077051} />
                         
                          */}
                         </div>

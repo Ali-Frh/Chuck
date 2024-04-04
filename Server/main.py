@@ -208,6 +208,7 @@ def get_mess(data):
         
         emit("getMessages", json.dumps (
         r      ))
+        print("SENT")
 
 @socket.on("get_chats")
 def get_chats(data):
