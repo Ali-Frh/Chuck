@@ -15,6 +15,8 @@ import {
   Link
 } from "react-router-dom";
 import axios from "axios"
+
+// import {useState} from
 // window.test = "Fuck";
 
 
@@ -52,6 +54,22 @@ const Logout = () => {
   )
 }
 
+
+const Dick = () => {
+  const [grape, setGrape] = useState("");
+
+  return (
+    <>
+      <b>Works</b>
+      <i>{grape}</i>
+      <button onClick={() => {
+        setGrape("banana");
+        console.log(grape);
+      }} >a</button>
+    </>
+  )
+}
+
 function App() {
   // const [count, setCount] = useState(0)
 
@@ -63,6 +81,8 @@ function App() {
           <Route path="/" element={ <Home /> } />
           
           <Route path="/logout" element={ <Logout /> } />
+
+          <Route path="/dick" element={ <Dick />} />
         </Routes>
       </Router>
     </>

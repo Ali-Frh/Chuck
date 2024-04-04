@@ -22,7 +22,8 @@ const AppHome = () => {
     const [avatar, setAvatar] = useState(dude);
     const [chat_id, setChat_id] = useState(0); 
 
-    const [Messages, setMessages] = useState({}) 
+    const [Messages, setMessages] = useState(); 
+    const [Talks, setTalks] = useState("");
     // const MessagesArea = 
 
     
@@ -63,14 +64,21 @@ const AppHome = () => {
             console.log(data )
             // const vale = {5: "suka"}
             // const val = {chat_id:data["messages"]}
-            // const id = "chat_" + data["chat_id"];
+            const id = "chat_" + data["chat_id"];
             // const chts = data["messages"];
 
-            // setMessages({id:[chts]})
+            const e = {}
+            e[id] = data["messages"];
+            // const s = {"test":"suka"}
+
+
+            setMessages(prev=> ({ ...prev,  ...e}));
+
             // window.mess = Messages;
             // setMessages(prev => [...prev, val]);
             // Messages[5] = data["messages"];
-            console.log(Messages);
+            // console.log(Messages);
+            // console.log(e);
         } 
 
         function onFooEvent(value) {
@@ -93,7 +101,7 @@ const AppHome = () => {
         //   socket.off('foo', onFooEvent);
         };
     }, []);
-
+    // setMessages("Salam");
 
 
     
@@ -167,25 +175,13 @@ const AppHome = () => {
             Meow {chat_id}
             
 
-            { Messages}
-            {window.mess = Messages}
-            {/* {Object.keys(Messages[chat_id]).map(message => ( */}
-                
-                {/* {message} */}
-                {/* // <ChatItem */}
-                    {/* // key={chatId} */}
-                    {/* // chat={chats[chatId ]} */}
-                    {/* // /> */}
-                
-                
-            {/* // ))} */}
-            {/* { (chats) } */}
+            
         </div>
     );
     
-    const [inChat, setInChat] = useState( !true ) 
+    const [inChat, setInChat] = useState( true ) 
     return (
-
+        
 
     //   <div className="">
         <>
@@ -193,6 +189,14 @@ const AppHome = () => {
         
         <PanelGroup className="chatroom" autoSaveId="example" direction="horizontal">
             <Panel defaultSize={25} maxSize={50} minSize={8}>
+                    <button onClick={()=> {
+                                // setTalks("Salam");
+                                // setMessages({"1":["howdy","suka"]})
+                                console.log(Messages);
+
+                            // Messages.current.appendChild(<Message mid={2} from_user={1} to_user={1}
+                                // type={"text"} value={"sukw"} time={0} />);
+                        }}>test</button>
              
                 <span className={`indic ${isConnected ? "green" : "red"}` }>.</span>
                 <button className="add-friend">+ </button>
@@ -254,12 +258,15 @@ const AppHome = () => {
                     </div> 
                     <div className="chat-stage">
                         <button onClick={()=> {
+                                setTalks("Salam");
+                                console.log(Talks);
+
                             // Messages.current.appendChild(<Message mid={2} from_user={1} to_user={1}
                                 // type={"text"} value={"sukw"} time={0} />);
                         }}>test</button>
                         <div className="messages" >
                             
-                            <MessagesList />
+                            {/* <MessagesList /> */}
                             {/* <Message mid={1} from_user={1} to_user={1} type={"text"} value={"Hey Koni!"} time={1712077050} />
                             <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
                             <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
