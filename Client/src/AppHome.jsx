@@ -7,7 +7,7 @@ import Message from "./message.jsx"
 import { useRef, useState, useEffect } from "react";
 // import io from "socket.io-client"
 
-
+import AddFriend from "./AddFriend.jsx"
 import { socket } from './socket.js';
 
 // divRef.current.scrollTop = divRef.current.scrollHeight;
@@ -25,6 +25,7 @@ const AppHome = () => {
     const [currentMessages, setCurrentMessages] = useState([])
     const [atButt, setAtButt] = useState(false);
 
+    const [addFriendShow, setAddFriendShow] = useState(false)
     const [width, setWidth] = useState(window. innerWidth)
     const [haveBadge, setHaveBadge] = useState([]); 
     const scrollToBottom = () => {
@@ -321,7 +322,8 @@ const AppHome = () => {
     //   <div className="">
         <>
         
-        
+        {addFriendShow && <AddFriend close={()=> setAddFriendShow(!true)} />}
+
         <PanelGroup className="chatroom" autoSaveId="example" direction="horizontal">
             {((width > 600) || (!inChat)) && 
             <Panel defaultSize={25} maxSize={50} minSize={8}>
@@ -335,7 +337,7 @@ const AppHome = () => {
                         }}>test</button> */}
              
                 <span className={`indic ${isConnected ? "green" : "red"}` }>.</span>
-                <button className="add-friend">+ </button>
+                <button className="add-friend" onClick={() => {setAddFriendShow(true)}} >+ </button>
                 <div className="bar">
                     <div className="west">
                         {/* <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -440,7 +442,10 @@ const AppHome = () => {
                             <div className="senddocs">
                             </div>
                             <div className="textbox">
-                                <button>+</button>
+                                <button onClick={() => {
+                                    // <addFriend />
+                                    
+                                }}>+</button>
                                 <textarea name="" id="" cols="30" rows="1" ref ={textBox}></textarea>
                                 <button onClick={(e) => {sendMessage(e)} }>
                                 
