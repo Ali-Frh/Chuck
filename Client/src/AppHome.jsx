@@ -24,6 +24,9 @@ const AppHome = () => {
     const messagesEndRef = useRef(null);
     const [currentMessages, setCurrentMessages] = useState([])
     const [atButt, setAtButt] = useState(false);
+
+    const [width, setWidth] = useState(window. innerWidth)
+    const [haveBadge, setHaveBadge] = useState([]); 
     const scrollToBottom = () => {
         if (messagesEndRef.current) {
                 // const element = messagesEndRef.current;
@@ -32,6 +35,18 @@ const AppHome = () => {
               }
             
         };
+
+        useEffect(() => {
+            const handleResize = () => {
+              setWidth(window.innerWidth);
+            };
+        
+            window.addEventListener('resize', handleResize);
+        
+            return () => {
+              window.removeEventListener('resize', handleResize);
+            };
+          }, []);
           
 
       useEffect(() => {
@@ -40,6 +55,11 @@ const AppHome = () => {
         }
       }, [currentMessages]); // Scroll to bottom whenever currentMessages change
     
+      const closeChat = () => {
+        setCurrentMessages([]);
+        setChat_id(0);
+        setInChat(false); 
+      } 
 
       const handleScroll = (event) => {
         const { scrollTop, scrollHeight, clientHeight } = event.target;
@@ -84,15 +104,10 @@ const AppHome = () => {
         function onFooEvent(value) {
           setFooEvents(previous => [...previous, value]);
         }
-        socket.on("get_chats", onGetChats ); 
         socket.on('connect', onConnect);
         socket.on('disconnect', onDisconnect);
-        socket.on("incomingMsg", (data)=> {
-            console.log(data);
-        })
 
         socket.on("getMessages", loadMessages); 
-        socket.on("openChat", openChatBlyat);
         // socket.on('foo', onFooEvent);
     
         return () => {
@@ -101,7 +116,44 @@ const AppHome = () => {
         //   socket.off('foo', onFooEvent);
         };
     }, []);
+    socket.on("openChat", openChatBlyat);
+    socket.on("get_chats", onGetChats ); 
+
     // setMessages("Salam");
+    const haha = (data) => {
+        // (data)=> {
+            console.log(data);
+            const d = JSON.parse(data); 
+            if (d["chat_id"] == chat_id ){
+                console.log("neww")
+
+                const de = [[+chat_id, d["type"], d["value"], d["send_at"], null , null]];
+                setCurrentMessages(prev => {
+                // Filter out elements from d that are already present in prev
+                 const filteredD = de.filter(newMessage => !prev.some(existingMessage => existingMessage[3] === newMessage[3]));
+              
+                // Update state by combining prev and filteredD
+                // return [...prev, ...filteredD];
+                return [...filteredD, ...prev]
+              });
+              
+                // setCurrentMessages(prev=> ([...prev, ...[]]))
+            } else {
+                if (d["chat_id"] != localStorage.getItem("uid")) {
+
+                    setHaveBadge(prev=> ([...prev, d["chat_id"]]))
+                }
+                // console.log(chat_id+"_"+d["chat_id"])
+                // document.getElementById("2").click
+            }
+        // }
+    }
+
+
+    socket.on("incomingMsg", haha)
+    
+    
+    
 
     function onGetChats(value) {
         // setChats(value);
@@ -121,6 +173,8 @@ const AppHome = () => {
         // console.log(data);
         // console.log("called")
         setCurrentMessages([]);
+        setHaveBadge(prevState => prevState.filter(id => id !== +data["chat_id"]));
+        scrollToBottom()
 
     }
 
@@ -173,7 +227,16 @@ const AppHome = () => {
         
         socket.emit("sendMessage", JSON.stringify(data));
 
+        const d = [[+localStorage.getItem("uid"), "text", textBox.current.value, Date.now(), null, null]]; 
         textBox.current.value = "";
+        setCurrentMessages(prev => {
+            // Filter out elements from d that are already present in prev
+             const filteredD = d.filter(newMessage => !prev.some(existingMessage => existingMessage[3] === newMessage[3]));
+          
+            // Update state by combining prev and filteredD
+            // return [...prev, ...filteredD];
+            return [...filteredD, ...prev]
+          });
     }
     
     const getMessages =  (chat_id, offset) => {
@@ -184,13 +247,14 @@ const AppHome = () => {
         // textBox.current.value =  "";
     }
 
-    const openChat = (e) => {
-        console.log ("calld",e.target.id )
-        socket.emit("openChat", e.target.id);
+    const openChat = (e, chat) => {
+        console.log("ch"+chat); 
+        console.log ("calld",chat )
+        socket.emit("openChat", chat);
         // getMessages(e.target.id, "none");
         // console.log(chat_id+"=>"+offset)
         const data = {
-            "chat_id": e.target.id,
+            "chat_id": chat,
             "offset": "none",
             // "value": textBox.current.value
         }
@@ -201,11 +265,14 @@ const AppHome = () => {
 
     const ChatItem = ({ chat }) => (
         
-        <div className={`chat-item ${chat_id == chat["chat_id"] ? "active": "" }`} onClick={ openChat} id={chat["chat_id"]}>
+        <div className={`chat-item ${chat_id == chat["chat_id"] ? "active": "" }`} onClick={(e)=> openChat(e,chat["chat_id"])} id={chat["chat_id"]}>
             <img src={chat["avatar"] == "null"?  dude: chat["avatar" ]} alt="" />
             <div className="right">
                 <span className="title">{chat["name"]}</span>
                 <span></span>
+                {haveBadge.includes(chat["chat_id"]) && <span className="badge">
+                    .
+                </span>}
             </div>
         </div>
     );
@@ -231,7 +298,7 @@ const AppHome = () => {
             {/* Meow {chat_id} */}
             
             {console.log( currentMessages)}
-            {currentMessages.slice().reverse() .map((message, index) => (
+            {currentMessages && currentMessages.slice().reverse() .map((message, index) => (
                 // <div key={index}>{message[2]}</div>
                 <Message mid={0} from_user={message[0]} to_user={chat_id} type={message[1]} value ={message[2]} 
                 time =       {message[3]} />
@@ -256,6 +323,7 @@ const AppHome = () => {
         
         
         <PanelGroup className="chatroom" autoSaveId="example" direction="horizontal">
+            {((width > 600) || (!inChat)) && 
             <Panel defaultSize={25} maxSize={50} minSize={8}>
                     {/* <button onClick={()=> {
                                 // setTalks("Salam");
@@ -311,13 +379,28 @@ const AppHome = () => {
                     </div>
 
                 </div>
-            </Panel>
+            </Panel> 
+            }
             <PanelResizeHandle />
-            
+            {/* export function ChevronLeftIcon(props) {
+  return (
+    <svg dataSlot="icon" fill="none" strokeWidth={1.5} stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+    </svg>
+  );
+} */}
+
+
+            {((width > 600) || (inChat) ) &&
             <Panel className="yeaah">
                 {inChat  && 
                 <>
                     <div className="top-bar">
+                        <svg dataSlot="icon" onClick={closeChat} className="chev-left" fill="none" style={{color: "chocolate", width: "35px", paddingRight: "10px"}} strokeWidth={3} stroke="currentColor" viewBox="0 0 24 24"
+                         xmlns="http://www.w3.org/2000/svg" aria-hidden="true" >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                        </svg>
+
                         <img src={avatar} />     
                         <div className="namebox">
                             <span className="recipient">{chat_id == localStorage.getItem("uid") ? " Saved Message " : currentRecipient}</span>
@@ -326,7 +409,11 @@ const AppHome = () => {
                     </div> 
                     <div className="chat-stage">
                         <button style={{position: "absolute", top:0, right:0}} onClick={()=> {
-                            setCurrentMessages(prev=> ([...prev, ...prev]));
+                            // setCurrentMessages(prev=> ([...prev, ...prev])
+                            console.log(chat_id)
+                            
+                            // document.getElementById("2").style=
+                            
                             // Messages.current.appendChild(<Message mid={2} from_user={1} to_user={1}
                                 // type={"text"} value={"sukw"} time={0} />);
                         }}>test</button>
@@ -341,7 +428,15 @@ const AppHome = () => {
                          */}
                         </div>
 
+
                         <div className="sendarea">
+                                { !atButt &&
+                                <svg dataSlot="icon" onClick={scrollToBottom} className="last" fill="none" style={{color: "chocolate", width: "35px", paddingRight: "10px"}} strokeWidth={3} stroke="currentColor" viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg" aria-hidden="true" >
+                               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                               </svg>
+                            // <button className="last" onClick={scrollToBottom}>{">"}</button>
+                                }
                             <div className="senddocs">
                             </div>
                             <div className="textbox">
@@ -363,6 +458,7 @@ const AppHome = () => {
                 }
                 
             </Panel>
+            }
         </PanelGroup>
     </>
     )

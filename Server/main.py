@@ -181,7 +181,9 @@ def send(data):
         
         if int( data["chat_id"]     ) in  online_users:
             print("yeah")
-            emit("incomingMsg", json.dumps({"chat_id":conn_to_uid[request.sid], "type": data["type"] , "value": data["value"], "send_at":     int(time.time())}), 
+            emit("incomingMsg", json.dumps({"chat_id":conn_to_uid[request.sid],
+                                             "type": data["type"] , "value": data["value"],
+                                               "send_at":     int(time.time())}), 
                                            room=online_users[int( data["chat_id"]         )])
         # fresh = get_user_meta(conn_to_uid[request.sid]) [0]
         # dat = {int(conn_to_uid[request.sid]):{
@@ -245,17 +247,21 @@ def get_chats(data):
 
 @socket.on("openChat")
 def get_meta(uid):
-    fresh=  get_user_meta(uid) [0]
-    # fresh = get_user_meta(da[0]) [0]
-    ar = {}
-    ar["chat_id"] = uid
-    ar["last_message"] = 0
-    ar["name"] = fresh[1]
-    ar["username"] = fresh[2]
-    ar["avatar"] = fresh[3]
-    ar["last_online"] = fresh[4]
-    # dat.append( ar)
-    emit("openChat", json.dumps(ar))
+    try:
+        print("openChat of", uid)
+        fresh=  get_user_meta(uid) [0]
+        # fresh = get_user_meta(da[0]) [0]
+        ar = {}
+        ar["chat_id"] = uid
+        ar["last_message"] = 0
+        ar["name"] = fresh[1]
+        ar["username"] = fresh[2]
+        ar["avatar"] = fresh[3]
+        ar["last_online"] = fresh[4]
+        # dat.append( ar)
+        emit("openChat", json.dumps(ar))
+    except Exception as e:
+        print(e)
 
 
 @app.route("/auth",methods=['GET', 'POST'] ) 

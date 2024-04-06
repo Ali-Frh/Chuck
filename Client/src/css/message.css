@@ -6,6 +6,7 @@
     display: flex;
     /* margin-bottom: 10px; */
     margin: 4px 10px 4px 10px;
+    line-break: anywhere  ;
 }
 
 .messages {
