@@ -6,7 +6,7 @@ import { Input, Stack, Button } from '@chakra-ui/react'
 import io from "socket.io-client"
 import axios from "axios"
 
-function Login() {
+function Login(props ) {
   const [UserLogin, setUserLogin] = useState()
   const UserLoginElement = useRef();
   const NextButt = useRef()
@@ -38,7 +38,7 @@ function Login() {
   }
 
   const LoginHandler = () => {
-    axios.post("http://127.0.0.1:5000/login",{
+    axios.post("http://"+props.api +"/login",{
         payload: UserLogin,
         password: PassBox.current.value
     }).then((response)=> {
@@ -57,7 +57,7 @@ function Login() {
 
   const nextHandle = () => {
     
-    axios.post("http://127.0.0.1:5000/auth",{
+    axios.post("http://"+props.api+ "/auth",{
         payload: UserLogin
     }).then((response)=> {
       if (response.data == "found") {
@@ -74,7 +74,7 @@ function Login() {
     })
     // this.setSocketListeners = this.setSocketListeners.bind(this)
 
-    // const socket = new WebSocket("ws://127.0.0.1:5000");
+    // const socket = new WebSocket("ws://192.168.0.179:5000");
     // socket.addEventListener("open", () => {
 
       // socket.send("suka")

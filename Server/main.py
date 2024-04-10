@@ -39,7 +39,7 @@ def db_init():
     p = conn.cursor()
     p.execute("""
         Create Table if not exists messages(
-              mid integer,
+              mid integer primary  key Autoincrement,
               chat_id integer,
               replied_to integer,
               type text,
@@ -134,6 +134,23 @@ CORS(app)
 online_users = {}
 conn_to_uid = {}
 
+def buddies(uid):
+    with sqlite3.connect("data.db") as conn:
+        c = conn.cursor(        )
+        c.execute("Select chat_id  from chats where uid='"+str(uid)+"';" )
+        d= c.fetchall()
+        print("uid", uid, ":", d)
+    onlines = []
+    for i in d:
+        # print(i)
+        i = i[0]
+        if i in online_users:
+            onlines.append(online_users[i])
+
+    return onlines
+
+import  json
+
 @socket.on('connect')
 def test_connect():
     auth= request.headers.get('Authorization')
@@ -146,14 +163,23 @@ def test_connect():
     online_users[uid] = request.sid
     conn_to_uid[request.sid ]=  uid  
     print("User", uid, "is Online.")
-    emit('custom-server-msg',
-         {'data': 'Print this out via data.data in your client'})
+    # emit('custom-server-msg',
+        #  {'data': 'Print this out via data.data in your client'})
+    with sqlite3.connect("data.db") as conn:
+        c = conn.cursor(        )
+        c.execute("UPDATE users SET last_seen=0 WHERE uid=\""+str(uid) + "\";" )
+        conn.commit()
+    
+    budds = buddies(uid)
+    for budd in budds:
+        emit("lastSeenHook", json.dumps({"user": uid, "value": "0"}), room=budd)
+        # return c.fetchall()
+
 
 #  @socket.on("query")
 # def query_user(user):
     # print("hah")
 
-import  json
 
 def get_user_meta(uid):
     with sqlite3.connect("data.db") as conn:
@@ -190,6 +216,21 @@ def send(data):
         # dat = [{
             # "chat_id": conn_to_uid[request.sid],
 
+@socket.on('disconnect')
+def handle_disconnect():
+    uid = conn_to_uid [request.sid]
+    print('Client disconnected without telling', uid)
+
+    budds = buddies(uid)
+    for budd in budds:
+        print("told", budd, "="*20)
+        emit("lastSeenHook", json.dumps({"user": uid, "value": str(time.time() * 1000 )}) , room=budd)
+
+    with sqlite3.connect("data.db") as conn:
+        c = conn.cursor(        )
+        c.execute("UPDATE users SET last_seen=\""+str(time.time() * 1000 ) + "\" WHERE uid=\""+str(uid) + "\"; " )
+        conn.commit()
+
 @socket.on("getMessages")
 def get_mess(data):
     data = json.loads(data)
@@ -199,7 +240,7 @@ def get_mess(data):
     with sqlite3.connect("data.db") as conn:
         sq = conn.cursor()
         sq.execute(f"""
-    Select fromuser, type, value, send_at, replied_to, edited FROM messages WHERE (chat_id='{user}' AND fromuser ='{peer}') OR 
+    Select fromuser, type, value, send_at, mid, replied_to, edited FROM messages WHERE (chat_id='{user}' AND fromuser ='{peer}') OR 
         (chat_id='{peer}' AND fromuser='{user}') ORDER BY send_at DESC;                   
  """)
         # print("hah", data)
@@ -237,6 +278,7 @@ def get_chats(data):
             ar["name"] = fresh[1]
             ar["username"] = fresh[2]
             ar["avatar"] = fresh[3]
+            ar["lastSeen"] = fresh[4]
             dat.append( ar)
             # dat[da[0]]= ar
             # z = z +1
@@ -334,7 +376,7 @@ if __name__ == '__main__':
     # print(
         # token_helper_verify("8aFc1T8LALi9aF0JgdmusjwI")
     # ,"", token_helper_verify("12") )
-    socket.run(app, allow_unsafe_werkzeug=True)
+    socket.run(app,host="0.0.0.0", allow_unsafe_werkzeug=True)
         
 # from flask import Flask, render_template
 # from flask_socketio import SocketIO, emit

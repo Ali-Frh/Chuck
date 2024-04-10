@@ -1,0 +1,48 @@
+.context {
+    background: #FDAB71;
+    width: 200px;
+    /* height: 200px;  */
+    display:none;
+    border-radius: 10px;
+    position: absolute
+}
+
+.context > ul > li > svg { 
+    width: 32px;
+}
+
+.context > ul {
+    margin: 0;
+    padding:  0;
+    
+    border: 1px solid chocolate;
+    border-radius: 12px;
+}
+
+.context > ul > li  {
+    /* background-color: red; */
+    display: grid;
+    font-size: 1rem;
+    font-weight: 700;
+    border-bottom: 2px solid chocolate; 
+    grid-template-columns: 4fr 8fr;
+    align-items: center;
+    padding: 7px 10px;
+    /* width: 100%; */
+    list-style: none;
+    cursor: pointer ;
+
+}
+
+.context > ul > li:hover { 
+    background-color: chocolate;
+}
+
+.context > ul > li:nth-child(1) {
+    border-radius: 10px 10px 0 0;
+}
+
+.context > ul > li:nth-last-child(1) {
+    border-radius: 0 0 10px 10px ; 
+    border-bottom: 0;
+}

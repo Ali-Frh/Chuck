@@ -1,5 +1,10 @@
 import "./css/message.css"
 import {useState } from "react";
+import {showContextMenu} from "./ContextMenu"
+
+  // Usage: Add this event listener to the element where you want to show the context menu
+document.addEventListener('click', ()=> {document.getElementsByClassName('context')[0].style.display="none" });
+  
 
 const Message = (props) => {
 
@@ -14,13 +19,16 @@ const Message = (props) => {
              
              onContextMenu={(e) => {
                 e.preventDefault(); // prevent the default behaviour when right clicked
-                console.log("Right Click");
+                console.log("Right Click"+ e.clientX+ ":" + e.clientY);
+                showContextMenu(e);
+                // props.delete(props.mid, 0)
+                
               }}
         
              >
                 <div className="text">
-                    {props.type == "text" && <p dir="auto">
-                        {props.value}
+                    {props.type == "text" && <p dangerouslySetInnerHTML={{ __html: props.value.replace(/\n/g, "<br>") }} dir="auto">
+                        {/* {props.value.replace(/\n/g, "<br>")} */}
                     </p>}
                     {/* {window.test}  */}
                     {/* mid, from_user, to_user, type, value, time  */}

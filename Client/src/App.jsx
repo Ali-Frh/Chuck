@@ -8,6 +8,9 @@ import { Input, Stack } from '@chakra-ui/react'
 import Login from "./Login.jsx"
 import AppHome from "./AppHome.jsx"
 
+const API_ENDPOINT = "192.168.0.179:5000";
+
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -29,8 +32,9 @@ function Home() {
       <>
 
       {/* <h2>Suka </h2> */}
-      
-      <Login />
+      <meta name="viewport" content="width=device-width,user-scalable=no"></meta>
+      {/* <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"></meta> */}
+      <Login api={API_ENDPOINT} />
       </>
     );
   } else {
@@ -42,7 +46,7 @@ function Home() {
 
 
 const Logout = () => {
-  axios.post("http://127.0.0.1:5000/logout", {token: localStorage.getItem("token")}).then((response) => {
+  axios.post("http://"+API_ENDPOINT+"/logout", {token: localStorage.getItem("token")}).then((response) => {
     console.log( response.data)
     localStorage.removeItem("token")
   }).catch(()=> {

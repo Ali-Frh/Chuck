@@ -1,3 +1,4 @@
+import {ContextMenu} from "./ContextMenu"
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import "./css/apphome.css"; 
 import chuck from "./assets/chuck.png";
@@ -12,6 +13,45 @@ import { socket } from './socket.js';
 
 // divRef.current.scrollTop = divRef.current.scrollHeight;
 
+function getLastSeen(timestamp) {
+    if (timestamp == 0 ) {
+        return "Online";
+    } else {
+        console.log(timestamp)
+    }
+
+    const now = Date.now();
+    const diff = now - timestamp;
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    console.log(days + "-" + hours + "-" + seconds + "-" + minutes )
+    const date = new Date(timestamp);
+    const options = {
+      hour: 'numeric',
+      minute: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour12: true,
+    };
+  
+    if (days < 1) {
+        // console.log()
+        if (minutes < 10 && hours == 0) {
+            if (minutes == 0 ) {
+                return "Last seen just now"
+            }
+            return `last seen ${minutes} minutes ago` 
+        }
+      return `last seen at ${date.toLocaleTimeString(undefined, {hour:"numeric", minute:"numeric"})}`;
+    } else if (days === 1) {
+      return `last seen yesterday at ${date.toLocaleTimeString(undefined, { hour: 'numeric', minute: 'numeric', hour12: true })}`;
+    } else {
+      return `last seen ${date.toLocaleTimeString(undefined, options)}`;
+    }
+  }
+  
 
 const AppHome = () => {
     const [isConnected, setIsConnected] = useState(socket.connected);
@@ -64,7 +104,7 @@ const AppHome = () => {
 
       const handleScroll = (event) => {
         const { scrollTop, scrollHeight, clientHeight } = event.target;
-        const atBottom = scrollHeight - scrollTop === clientHeight;
+        const atBottom = scrollHeight - scrollTop <= clientHeight + 20;
         if (atBottom) {
             setAtButt(true);
             console.log("at butt")
@@ -119,6 +159,27 @@ const AppHome = () => {
     }, []);
     socket.on("openChat", openChatBlyat);
     socket.on("get_chats", onGetChats ); 
+    
+    const lastSeener = (data) => {
+        data = JSON.parse(data)
+        console.log(Chats)
+        console.log(data)
+        // console.log()
+        // const temp = Chats;
+        const updatedChats = Chats.map(chat => {
+            if (chat.chat_id === data.user) {
+                return {...chat, lastSeen: data.value}; // Replace 'new_last_seen_value' with the updated timestamp
+            }
+            return chat;
+        });
+        if (data. user == chat_id) {
+            setChats(updatedChats);
+            // setChats()
+            setLastOnline(data.value)
+            // console.log ("SUKA" + data. value)
+        } 
+    }
+    socket.on("lastSeenHook", lastSeener);
 
     // setMessages("Salam");
     const haha = (data) => {
@@ -127,7 +188,7 @@ const AppHome = () => {
             const d = JSON.parse(data); 
             if (d["chat_id"] == chat_id ){
                 console.log("neww")
-
+                
                 const de = [[+chat_id, d["type"], d["value"], d["send_at"], null , null]];
                 setCurrentMessages(prev => {
                 // Filter out elements from d that are already present in prev
@@ -219,6 +280,9 @@ const AppHome = () => {
     
     const sendMessage =  (e) => {
         // alert("ha"); 
+        if (textBox.current.value .replace(/\s/g, '').length == 0) {
+            return;
+        }
         console.log (textBox.current.value);
         const data = {
             "chat_id": chat_id,
@@ -228,8 +292,13 @@ const AppHome = () => {
         
         socket.emit("sendMessage", JSON.stringify(data));
 
-        const d = [[+localStorage.getItem("uid"), "text", textBox.current.value, Date.now(), null, null]]; 
-        textBox.current.value = "";
+        const d = [[+localStorage.getItem("uid"), "text", textBox.current.value, Date.now()/1000, null, null]]; 
+        setTimeout(()=> {
+
+            textBox.current.value = ""
+        }, 100);
+        // textBox.current.rows = 1;
+        if (chat_id != localStorage.getItem("uid")){
         setCurrentMessages(prev => {
             // Filter out elements from d that are already present in prev
              const filteredD = d.filter(newMessage => !prev.some(existingMessage => existingMessage[3] === newMessage[3]));
@@ -238,6 +307,12 @@ const AppHome = () => {
             // return [...prev, ...filteredD];
             return [...filteredD, ...prev]
           });
+        
+        }
+    }
+
+    const DeleteMessage = (e) => {
+        alert(e);
     }
     
     const getMessages =  (chat_id, offset) => {
@@ -267,13 +342,24 @@ const AppHome = () => {
     const ChatItem = ({ chat }) => (
         
         <div className={`chat-item ${chat_id == chat["chat_id"] ? "active": "" }`} onClick={(e)=> openChat(e,chat["chat_id"])} id={chat["chat_id"]}>
-            <img src={chat["avatar"] == "null"?  dude: chat["avatar" ]} alt="" />
+            <div>
+                <img width={"50px"} height={"50px"} src={chat["avatar"] == "null"?  dude: chat["avatar" ]} alt="" />
+                
+                {chat["lastSeen"] == 0  &&
+
+                <span className="onlineindic">
+                        .
+                </span>}
+            </div> 
+            
             <div className="right">
                 <span className="title">{chat["name"]}</span>
                 <span></span>
                 {haveBadge.includes(chat["chat_id"]) && <span className="badge">
                     .
                 </span>}
+
+                
             </div>
         </div>
     );
@@ -293,6 +379,14 @@ const AppHome = () => {
             {/* { (chats) } */}
         </div>
     );
+
+    const deleteMessage = (mid, chat) => {
+        const updatedMessages = currentMessages.filter(item => item[4] !== mid);
+
+// Update the state with the new array
+        setCurrentMessages(updatedMessages);
+
+    }
     
     const MessagesList = () => (
         <>
@@ -301,8 +395,8 @@ const AppHome = () => {
             {console.log( currentMessages)}
             {currentMessages && currentMessages.slice().reverse() .map((message, index) => (
                 // <div key={index}>{message[2]}</div>
-                <Message mid={0} from_user={message[0]} to_user={chat_id} type={message[1]} value ={message[2]} 
-                time =       {message[3]} />
+                <Message key={message[4 ]} mid={message[4 ]} from_user={message[0]} to_user={chat_id} type={message[1]} value ={message[2]} 
+                time =       {message[3]} delete={deleteMessage}  />
                 
             ))}
                 {/* <Message mid={1} from_user={1} to_user={1} type={"text"} value={"Hey Koni!!!!!!!!!!!!!!!!!!!"} time={1712077050} /> */}
@@ -386,7 +480,7 @@ const AppHome = () => {
             <PanelResizeHandle />
             {/* export function ChevronLeftIcon(props) {
   return (
-    <svg dataSlot="icon" fill="none" strokeWidth={1.5} stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" {...props}>
+    <svg  fill="none" strokeWidth={1.5} stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" {...props}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
     </svg>
   );
@@ -398,7 +492,7 @@ const AppHome = () => {
                 {inChat  && 
                 <>
                     <div className="top-bar">
-                        <svg dataSlot="icon" onClick={closeChat} className="chev-left" fill="none" style={{color: "chocolate", width: "35px", paddingRight: "10px"}} strokeWidth={3} stroke="currentColor" viewBox="0 0 24 24"
+                        <svg   onClick={closeChat} className="chev-left" fill="none" style={{color: "chocolate", width: "35px", paddingRight: "10px"}} strokeWidth={3} stroke="currentColor" viewBox="0 0 24 24"
                          xmlns="http://www.w3.org/2000/svg" aria-hidden="true" >
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                         </svg>
@@ -406,7 +500,7 @@ const AppHome = () => {
                         <img src={avatar} />     
                         <div className="namebox">
                             <span className="recipient">{chat_id == localStorage.getItem("uid") ? " Saved Message " : currentRecipient}</span>
-                            <span className="suka">{chat_id == localStorage.getItem("uid") ? "Online": lastOnline} </span>
+                            <span className="suka">{chat_id == localStorage.getItem("uid") ? "Online": getLastSeen( lastOnline) } </span>
                         </div>
                     </div> 
                     <div className="chat-stage">
@@ -428,12 +522,13 @@ const AppHome = () => {
                             <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
                         
                          */}
+                            <ContextMenu />
                         </div>
 
 
                         <div className="sendarea">
                                 { !atButt &&
-                                <svg dataSlot="icon" onClick={scrollToBottom} className="last" fill="none" style={{color: "chocolate", width: "35px", paddingRight: "10px"}} strokeWidth={3} stroke="currentColor" viewBox="0 0 24 24"
+                                <svg  onClick={scrollToBottom} className="last" fill="none" style={{color: "chocolate", width: "35px", paddingRight: "10px"}} strokeWidth={3} stroke="currentColor" viewBox="0 0 24 24"
                                 xmlns="http://www.w3.org/2000/svg" aria-hidden="true" >
                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                                </svg>
@@ -444,9 +539,18 @@ const AppHome = () => {
                             <div className="textbox">
                                 <button onClick={() => {
                                     // <addFriend />
+                                    alert(window.innerHeight + ", " + window.height + "/"  )
                                     
                                 }}>+</button>
-                                <textarea name="" id="" cols="30" rows="1" ref ={textBox}></textarea>
+                                <textarea dir="auto" name="" id="" cols="30" rows="1" 
+                                ref ={textBox}
+                                onKeyPress={(e)=> {
+                                    if(e.key == "Enter" && !e.nativeEvent.shiftKey) {
+                                        sendMessage(e)
+
+                                    }
+                                }}
+                                ></textarea>
                                 <button onClick={(e) => {sendMessage(e)} }>
                                 
 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
