@@ -8,7 +8,8 @@ import { Input, Stack } from '@chakra-ui/react'
 import Login from "./Login.jsx"
 import AppHome from "./AppHome.jsx"
 
-const API_ENDPOINT = "192.168.0.179:5000";
+// const API_ENDPOINT = "192.168.0.179:5000";
+const API_ENDPOINT = process.env.NODE_ENV === 'production' ? "https://chuck127.easterndns.com:1080" : 'http://192.168.0.179:5000';
 
 
 import {
@@ -46,7 +47,7 @@ function Home() {
 
 
 const Logout = () => {
-  axios.post("http://"+API_ENDPOINT+"/logout", {token: localStorage.getItem("token")}).then((response) => {
+  axios.post(API_ENDPOINT+"/logout", {token: localStorage.getItem("token")}).then((response) => {
     console.log( response.data)
     localStorage.removeItem("token")
   }).catch(()=> {

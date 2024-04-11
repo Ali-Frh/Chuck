@@ -1,3 +1,5 @@
+import eventlet, sys
+
 from flask import Flask, request
 # Needed for localhost testing.
 from flask_cors import CORS, cross_origin
@@ -428,10 +430,11 @@ def logout():
     return "logged out"
         # if len(res) == 0:
             # return "wrong"
-        # else:
+        # else: 
             # print(res[0])
             # return token_helper_logged_in(res[0][0], "Chuck Web v1.0", request.remote_addr)
             # return "true buddy"
+
 
 if __name__ == '__main__':
     db_init() #move it to later func 
@@ -441,7 +444,16 @@ if __name__ == '__main__':
     # print(
         # token_helper_verify("8aFc1T8LALi9aF0JgdmusjwI")
     # ,"", token_helper_verify("12") )
-    socket.run(app,host="0.0.0.0", allow_unsafe_werkzeug=True)
+    if (len(sys.argv)) == 2:
+        if sys.argv[1].lower() == "ssl":
+            print("loading ssl")
+            eventlet.monkey_patch() 
+            ssl_context = ('/etc/letsencrypt/live/chuck127.easterndns.com/fullchain.pem',
+                '/etc/letsencrypt/live/chuck127.easterndns.com/privkey.pem')
+            socket.run(app, port=1080, host="0.0.0.0", debug=True, use_reloader=True, certfile=ssl_context[0], keyfile=ssl_context[1], log_output=True)
+    else:
+        print("no ssl")
+        socket.run(app,host="0.0.0.0", allow_unsafe_werkzeug=True)
         
 # from flask import Flask, render_template
 # from flask_socketio import SocketIO, emit

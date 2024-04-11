@@ -38,7 +38,7 @@ function Login(props ) {
   }
 
   const LoginHandler = () => {
-    axios.post("http://"+props.api +"/login",{
+    axios.post( props.api +"/login",{
         payload: UserLogin,
         password: PassBox.current.value
     }).then((response)=> {
@@ -57,7 +57,7 @@ function Login(props ) {
 
   const nextHandle = () => {
     
-    axios.post("http://"+props.api+ "/auth",{
+    axios.post( props.api+ "/auth",{
         payload: UserLogin
     }).then((response)=> {
       if (response.data == "found") {
