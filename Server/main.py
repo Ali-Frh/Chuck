@@ -39,14 +39,16 @@ def db_init():
     p = conn.cursor()
     p.execute("""
         Create Table if not exists messages(
-              mid integer primary  key Autoincrement,
+              mid integer,
               chat_id integer,
               replied_to integer,
               type text,
               value text,
+              fromuser integer, 
               send_at integer,
               edited text,
-              deleted text 
+              deleted text, 
+              id INTEGer primary  key Autoincrement
 
         )
 """
@@ -121,6 +123,23 @@ def token_helper_verify(token):
     # if pube 
     return pube
 
+def get_last_mid(uid, chat_id):
+    
+    with sqlite3.connect("data.db") as conn:
+        c = conn.cursor(        )
+        # c.execute(f"SELECT mid FROM messages WHERE (uid)")
+        c.execute(f"""
+    Select mid FROM messages WHERE (chat_id='{chat_id}' AND fromuser ='{uid}') OR 
+        (chat_id='{uid}' AND fromuser='{chat_id}') ORDER BY send_at DESC LIMIT 1;                   
+ """)
+        # numba = 0
+        numba = c.fetchone()
+    
+    if numba == None:
+        return 0
+    else:
+        return numba[0]
+
 app = Flask(__name__)
 
 # Socket io setup.
@@ -187,16 +206,54 @@ def get_user_meta(uid):
         c.execute("Select uid,name,username,avatar,last_seen from users where uid='"+str(uid)+"';" )
         return c.fetchall()
 
+@socket.on("deleteMessage")
+def delete(data):
+    with sqlite3.connect("data.db") as conn:
+        sq = conn.cursor()
+        data = json.loads(data)
+        uid = str(conn_to_uid[request.sid])
+        chat_id = data["chat_id"]
+        mid = data["mid"]
+
+        # Check if the message exists and belongs to the user
+        sq.execute(f"""
+                    SELECT COUNT(*) FROM messages
+                    WHERE mid = ? AND ((chat_id = ? AND fromuser = ?) OR (fromuser = ? AND chat_id = ?))
+                    """, (mid, chat_id, uid, chat_id, uid))
+        message_exists = sq.fetchone()[0]
+
+        if message_exists and mid != None:
+            sq.execute(
+                f"""
+                        DELETE FROM messages
+                        WHERE mid = ? AND ((chat_id = ? AND fromuser=?) OR (fromuser = ? and chat_id = ?) )
+                        """, (mid, chat_id, uid,chat_id, uid))
+            conn.commit()
+            print("Message deleted:", mid)
+
+            if (int(chat_id) in online_users):
+                room = online_users[int(chat_id)]
+                emit("deleteMessage", json.dumps({"chat_id": uid,  "mid": mid}), room=room)
+
+            emit("deleteMessage", json.dumps({"chat_id": chat_id, "mid": mid}))
+            # conn.commit()
+        else:
+            print("Message not found or permission denied.")
+
 @socket.on("sendMessage")
 def send(data):
     with sqlite3.connect("data.db") as conn:
         sq = conn.cursor()
         data = json.loads(data)
+        sender = str(conn_to_uid[request.sid])
+
+        mid = get_last_mid(sender, data["chat_id"]) + 1 
         sq.execute(f"""
-                   INSERT INTO messages(chat_id, type, fromuser, value, send_at) VALUES(
+                   INSERT INTO messages(mid, chat_id, type, fromuser, value, send_at) VALUES(
+                   "{mid} ",
                    "{data["chat_id"]}", 
                 "{ data["type"]}",
-                   {str(conn_to_uid[request.sid])}, 
+                   {sender}, 
                  "{data["value"]}",
                    {int(time.time() )}) """)
         print("hah", data)
@@ -207,10 +264,18 @@ def send(data):
         
         if int( data["chat_id"]     ) in  online_users:
             print("yeah")
-            emit("incomingMsg", json.dumps({"chat_id":conn_to_uid[request.sid],
+            emit("incomingMsg", json.dumps({"mid": mid, 
+                                            "sender": sender,
+                                             "chat_id":conn_to_uid[request.sid],
                                              "type": data["type"] , "value": data["value"],
                                                "send_at":     int(time.time())}), 
                                            room=online_users[int( data["chat_id"]         )])
+        emit("incomingMsg",json.dumps({"mid": mid, 
+                                       "sender": sender,
+                                             "chat_id": data["chat_id"],
+                                             "type": data["type"] , "value": data["value"],
+                                               "send_at":     int(time.time())}))
+
         # fresh = get_user_meta(conn_to_uid[request.sid]) [0]
         # dat = {int(conn_to_uid[request.sid]):{
         # dat = [{

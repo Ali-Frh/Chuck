@@ -10,6 +10,7 @@ import { useRef, useState, useEffect } from "react";
 
 import AddFriend from "./AddFriend.jsx"
 import { socket } from './socket.js';
+import axios from "axios";
 
 // divRef.current.scrollTop = divRef.current.scrollHeight;
 
@@ -68,6 +69,7 @@ const AppHome = () => {
     const [addFriendShow, setAddFriendShow] = useState(false)
     const [width, setWidth] = useState(window. innerWidth)
     const [haveBadge, setHaveBadge] = useState([]); 
+    const [currentMid, setMid] = useState(0);
     const scrollToBottom = () => {
         if (messagesEndRef.current) {
                 // const element = messagesEndRef.current;
@@ -188,8 +190,10 @@ const AppHome = () => {
             const d = JSON.parse(data); 
             if (d["chat_id"] == chat_id ){
                 console.log("neww")
+                console.log(d)
                 
-                const de = [[+chat_id, d["type"], d["value"], d["send_at"], null , null]];
+                const de = [[parseInt(d["sender"]), d["type"], d["value"], d["send_at"], +d["mid"], null , null]];
+                console.log("+ "+ de)
                 setCurrentMessages(prev => {
                 // Filter out elements from d that are already present in prev
                  const filteredD = de.filter(newMessage => !prev.some(existingMessage => existingMessage[3] === newMessage[3]));
@@ -298,17 +302,17 @@ const AppHome = () => {
             textBox.current.value = ""
         }, 100);
         // textBox.current.rows = 1;
-        if (chat_id != localStorage.getItem("uid")){
-        setCurrentMessages(prev => {
-            // Filter out elements from d that are already present in prev
-             const filteredD = d.filter(newMessage => !prev.some(existingMessage => existingMessage[3] === newMessage[3]));
+        // if (chat_id != localStorage.getItem("uid")){
+        // setCurrentMessages(prev => {
+        //     // Filter out elements from d that are already present in prev
+        //      const filteredD = d.filter(newMessage => !prev.some(existingMessage => existingMessage[3] === newMessage[3]));
           
-            // Update state by combining prev and filteredD
-            // return [...prev, ...filteredD];
-            return [...filteredD, ...prev]
-          });
+        //     // Update state by combining prev and filteredD
+        //     // return [...prev, ...filteredD];
+        //     return [...filteredD, ...prev]
+        //   });
         
-        }
+        // }
     }
 
     const DeleteMessage = (e) => {
@@ -380,12 +384,23 @@ const AppHome = () => {
         </div>
     );
 
+    socket.on("deleteMessage", (data) => {
+        data = JSON.parse(data)
+        console.log(data )
+        if (data["chat_id"] == chat_id) {
+            let mid = data["mid"]
+            console.log("hidin "+mid)
+            const updatedMessages = currentMessages.filter(item => item[4] !== mid);
+            
+            // Update the state with the new array
+            setCurrentMessages(updatedMessages);
+        }
+
+    } )
+
     const deleteMessage = (mid, chat) => {
-        const updatedMessages = currentMessages.filter(item => item[4] !== mid);
-
-// Update the state with the new array
-        setCurrentMessages(updatedMessages);
-
+        socket.emit("deleteMessage", JSON.stringify({chat_id:chat_id, mid: mid}));
+        console.log("Requesting delete "+mid+" in "+chat_id)
     }
     
     const MessagesList = () => (
@@ -396,7 +411,7 @@ const AppHome = () => {
             {currentMessages && currentMessages.slice().reverse() .map((message, index) => (
                 // <div key={index}>{message[2]}</div>
                 <Message key={message[4 ]} mid={message[4 ]} from_user={message[0]} to_user={chat_id} type={message[1]} value ={message[2]} 
-                time =       {message[3]} delete={deleteMessage}  />
+                time =       {message[3]} delete={deleteMessage} setMid={setMid } />
                 
             ))}
                 {/* <Message mid={1} from_user={1} to_user={1} type={"text"} value={"Hey Koni!!!!!!!!!!!!!!!!!!!"} time={1712077050} /> */}
@@ -522,7 +537,7 @@ const AppHome = () => {
                             <Message mid={2} from_user={2} to_user={1} type={"text"} value={"Salam Dada !"} time={1712077051} />
                         
                          */}
-                            <ContextMenu />
+                            <ContextMenu delete={deleteMessage} mid={currentMid} />
                         </div>
 
 

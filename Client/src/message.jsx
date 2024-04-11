@@ -18,9 +18,10 @@ const Message = (props) => {
              id={props.to_user+"-"+props.mid}
              
              onContextMenu={(e) => {
+                props.setMid(props.mid);
                 e.preventDefault(); // prevent the default behaviour when right clicked
                 console.log("Right Click"+ e.clientX+ ":" + e.clientY);
-                showContextMenu(e);
+                showContextMenu(e, props.mid);
                 // props.delete(props.mid, 0)
                 
               }}
