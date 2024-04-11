@@ -48,8 +48,9 @@ function Home() {
 
 const Logout = () => {
   axios.post(API_ENDPOINT+"/logout", {token: localStorage.getItem("token")}).then((response) => {
-    console.log( response.data)
+    // console.log( response.data)
     localStorage.removeItem("token")
+    window.location = "/"
   }).catch(()=> {
     console.log("we fckd")
   });

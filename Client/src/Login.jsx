@@ -15,6 +15,8 @@ function Login(props ) {
   const PassBox = useRef () 
   const ShowHide = useRef()     
   const Baloon = useRef() 
+  const [state, setState] = useState(null);
+
 
   const ShowHideFunc = (el) => {
     // console.log(el)
@@ -67,7 +69,12 @@ function Login(props ) {
           // ShowHide.current.st
           EditButt.current.style.display = "Block";
       } else {
-
+        // UserLoginElement.current.disabled=true;
+        // LoginElement.current.style.display="block";
+       // NextButt.current.style.display="none"
+         setState ("register")
+        // ShowHide.current.st
+        // EditButt.current.style.display = "Block";
       }
     }).catch(()=>{
       console. log("Fuxk")
@@ -119,6 +126,13 @@ function Login(props ) {
             </div>
             {/* <label htmlFor="mail"></label> */}
             {/* <p className="slogan">Hello I'm Chuck</p> */}
+            {
+              state == "register" &&
+            <p className="register-text">User not found <br/> wanna create new account ? 
+             <a onClick={() => {setState(null)}}>Fuck No</a>
+             </p>
+            }
+
               <div class="mail-holder">
 
                 <input type="mail" ref={UserLoginElement} onChange={(e)=>setUserLogin(e.target.value)} placeholder="Email Address / Username" className="mail" />
@@ -126,7 +140,10 @@ function Login(props ) {
               </div>
 
             <div className="stage-1">
+              {
+                state == null && 
               <button className="next" ref={NextButt} onClick={nextHandle}>Next</button>
+              }
             </div>
 
             <div className="log-in" ref={LoginElement}>
@@ -135,6 +152,16 @@ function Login(props ) {
               <button className="next login" onClick={LoginHandler}>Login</button>
               <i className="forgoot">i'm so silly that i forgot my password</i>
             </div>
+
+            { state == "register" && <div className="register">
+              {/* <input type="mail" onChange={(e)=>setUserLogin(e.target.value)} placeholder="Name" className="mail" />
+              <input type="mail" onChange={(e)=>setUserLogin(e.target.value)} placeholder="Email" className="mail" />
+
+              <input type="password" placeholder="Password" className="mail password" />
+              <i onClick={(e) => ShowHideFunc(e)} class="show edit">Show</i>
+              <button className="next login" onClick={LoginHandler}>Login</button> */}
+              Not ready :(
+            </div> }
 
           </div>
 

@@ -1,4 +1,4 @@
-import eventlet, sys
+import sys
 
 from flask import Flask, request
 # Needed for localhost testing.
@@ -440,21 +440,19 @@ if __name__ == '__main__':
     db_init() #move it to later func 
     db = db_connection()
     print("Starting websocket server")
-    # token_helper_logged_in("1", "Your Moms Phone", "1.2.3.4")
-    # print(
-        # token_helper_verify("8aFc1T8LALi9aF0JgdmusjwI")
-    # ,"", token_helper_verify("12") )
     if (len(sys.argv)) == 2:
         if sys.argv[1].lower() == "ssl":
             print("loading ssl")
+            import eventlet
             eventlet.monkey_patch() 
             ssl_context = ('/etc/letsencrypt/live/chuck127.easterndns.com/fullchain.pem',
                 '/etc/letsencrypt/live/chuck127.easterndns.com/privkey.pem')
             socket.run(app, port=1080, host="0.0.0.0", debug=True, use_reloader=True, certfile=ssl_context[0], keyfile=ssl_context[1], log_output=True)
     else:
         print("no ssl")
-        socket.run(app,host="0.0.0.0", allow_unsafe_werkzeug=True)
-        
+        # socket.run(app, port=5000, allow_unsafe_werkzeug=True)
+        socket.run(app, port=5000, host="0.0.0.0", debug=True, use_reloader=True)
+
 # from flask import Flask, render_template
 # from flask_socketio import SocketIO, emit
 

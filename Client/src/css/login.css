@@ -181,4 +181,24 @@ make chuck resize then maybe hide in hole when molests
     font-family: segoe ui;
      }
 
-     
+    
+    /* Sign up stuffs   */
+.register-text {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1rem;
+    /* text-align: center; */
+    font-weight: 600;
+    padding: 0 40px;
+
+}
+
+.register-text > a {
+    font-size: 0.9rem;
+    padding-left: 8px;
+    opacity: 0.8;
+    cursor: pointer;
+}
+
+.register-text> a:hover{ 
+ opacity: 1  ;   
+}

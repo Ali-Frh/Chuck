@@ -208,7 +208,7 @@ const AppHome = () => {
                 if (d["chat_id"] != localStorage.getItem("uid")) {
 
                     setHaveBadge(prev=> ([...prev, d["chat_id"]]))
-                }
+                }  
                 // console.log(chat_id+"_"+d["chat_id"])
                 // document.getElementById("2").click
             }
