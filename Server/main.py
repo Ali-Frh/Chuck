@@ -225,11 +225,18 @@ def delete(data):
         message_exists = sq.fetchone()[0]
 
         if message_exists and mid != None:
+            # sq.execute(
+            #     f"""
+            #             DELETE FROM messages
+            #             WHERE mid = ? AND ((chat_id = ? AND fromuser=?) OR (fromuser = ? and chat_id = ?) )
+            #             """, (mid, chat_id, uid,chat_id, uid))
             sq.execute(
-                f"""
-                        DELETE FROM messages
-                        WHERE mid = ? AND ((chat_id = ? AND fromuser=?) OR (fromuser = ? and chat_id = ?) )
-                        """, (mid, chat_id, uid,chat_id, uid))
+    f"""
+    UPDATE messages
+    SET deleted = 'yes'
+    WHERE mid = ? AND ((chat_id = ? AND fromuser = ?) OR (fromuser = ? AND chat_id = ?) )
+    """, (mid, chat_id, uid, chat_id, uid))
+
             conn.commit()
             print("Message deleted:", mid)
 
@@ -307,8 +314,8 @@ def get_mess(data):
     with sqlite3.connect("data.db") as conn:
         sq = conn.cursor()
         sq.execute(f"""
-    Select fromuser, type, value, send_at, mid, replied_to, edited FROM messages WHERE (chat_id='{user}' AND fromuser ='{peer}') OR 
-        (chat_id='{peer}' AND fromuser='{user}') ORDER BY send_at DESC;                   
+    Select fromuser, type, value, send_at, mid, replied_to, edited FROM messages WHERE (deleted IS NULL And ((chat_id='{user}' AND fromuser ='{peer}') OR 
+        (chat_id='{peer}' AND fromuser='{user}') )) ORDER BY send_at DESC;                   
  """)
         # print("hah", data)
         r = sq.fetchall()
