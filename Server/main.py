@@ -327,6 +327,17 @@ def get_mess(data):
         r      ))
         print("SENT")
 
+def get_buddies_last_mess(id1, id2): 
+    with sqlite3.connect("data.db") as conn: 
+        sq = conn.cursor()
+        sq.execute(f"""
+                   SELECT fromuser, type, value FROM messages WHERE
+                    deleted IS NULL AND ( (chat_id=? and fromuser=?) or (chat_id=? and fromuser=?)) 
+                    ORDER BY send_at DESC LIMIT 1
+                   """, (id1, id2, id2, id1))
+        return sq.fetchone()
+
+
 @socket.on("get_chats")
 def get_chats(data):
     with sqlite3.connect("data.db") as conn:
@@ -340,12 +351,16 @@ def get_chats(data):
             "last_message": "0",
             "name": "Saved Messages ",
             "username":fresh[2],
-            "avatar":"null"
+            "avatar":"null", 
+            "lastMess": [conn_to_uid[request.sid], "text", "He"]           
         }]
         data = sq.fetchall()
+
+
         # z = 1
         for da in data:
             fresh = get_user_meta(da[0]) [0]
+            mess = get_buddies_last_mess(conn_to_uid[request.sid], da[0])
             ar = {}
             ar["chat_id"] = da[0]
             ar["last_message"] = da[1]
@@ -353,6 +368,7 @@ def get_chats(data):
             ar["username"] = fresh[2]
             ar["avatar"] = fresh[3]
             ar["lastSeen"] = fresh[4]
+            ar["lastMess"] = mess
             dat.append( ar)
             # dat[da[0]]= ar
             # z = z +1

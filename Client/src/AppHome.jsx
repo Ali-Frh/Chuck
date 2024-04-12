@@ -55,6 +55,7 @@ function getLastSeen(timestamp) {
   
 
 const AppHome = () => {
+    var uid = localStorage.getItem("uid");
     const [isConnected, setIsConnected] = useState(socket.connected);
     const [fooEvents, setFooEvents] = useState([]);
     const [Chats, setChats] = useState([]);
@@ -92,12 +93,28 @@ const AppHome = () => {
           }, []);
           
 
+
+          
       useEffect(() => {
         if (atButt) {
             scrollToBottom();
         }
       }, [currentMessages]); // Scroll to bottom whenever currentMessages change
     
+      useEffect(()=> {
+        if (currentMessages.length != 0) {
+        const updatedChats = Chats.map(chat => {
+            if (chat.chat_id == chat_id) {
+                return {...chat, lastMess: [currentMessages[0][0], currentMessages[0][ 1], currentMessages[ 0][2]  ]}; // Replace 'new_last_seen_value' with the updated timestamp
+            }
+            return chat;
+        });
+        setChats(updatedChats);
+        console.log("hah", Chats)
+        console.log("haha", currentMessages)
+    }
+      }, [currentMessages])
+
       const closeChat = () => {
         setCurrentMessages([]);
         setChat_id(0);
@@ -188,6 +205,31 @@ const AppHome = () => {
         // (data)=> {
             console.log(data);
             const d = JSON.parse(data); 
+
+            data = d;
+
+
+            
+    
+
+
+
+
+
+            const updatedChats = Chats.map(chat => {
+                if (chat.chat_id == data["chat_id"]) {
+                    return {...chat, lastMess: [data["sender"], data["type"], data["value" ] ]}; // Replace 'new_last_seen_value' with the updated timestamp
+                }
+                return chat;
+            });
+    
+            setChats(updatedChats);
+            console.log("hah", Chats)
+
+
+
+
+
             if (d["chat_id"] == chat_id ){
                 console.log("neww")
                 console.log(d)
@@ -258,6 +300,9 @@ const AppHome = () => {
 
         const d = data["messages"];
         
+
+
+
         if (currentMessages == d) {
             console.log("condom"); 
         } else {
@@ -363,7 +408,12 @@ const AppHome = () => {
                     .
                 </span>}
 
-                
+                {/* <span></span> */}
+                <span className="lil-wrap">
+
+                <span className="who-said">{chat["lastMess"][0] == uid && chat["chat_id"] != uid && "You: "}</span>
+                <span className="lil-text">{chat["lastMess"][1] == "text" && chat["lastMess"][2]} </span>
+                </span>
             </div>
         </div>
     );
