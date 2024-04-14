@@ -529,4 +529,17 @@ div::-webkit-scrollbar-thumb:hover, textarea::-webkit-scrollbar-thumb:hover {
   gap: 4px;
   font-size: 0.9rem;
 }
+
   
+.fdate {
+  text-align: center;
+  padding: 5px 20px;
+  position: sticky;
+  top: 0;
+  width: content-fit;
+  color: white;
+  border-radius: 200px;
+  margin: auto; 
+  background: chocolate 
+  
+  }

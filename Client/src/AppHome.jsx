@@ -453,17 +453,41 @@ const AppHome = () => {
         console.log("Requesting delete "+mid+" in "+chat_id)
     }
     
-    const MessagesList = () => (
+    
+    const MessagesList = () => {
+        let lastDate = 0;
+        
+        return  (
         <>
             {/* Meow {chat_id} */}
             
             {console.log( currentMessages)}
-            {currentMessages && currentMessages.slice().reverse() .map((message, index) => (
+            {currentMessages && currentMessages.slice().reverse() .map((message, index) => { 
+                let d = new Date(message[3]* 1000 );
+                let dete = d.toLocaleString("en-us", {month: "long", day:"numeric"})
+                // dete = message[3]
+                // lastDate == 0 ? lastDate = dete : lastDate;
+
+                return (
                 // <div key={index}>{message[2]}</div>
-                <Message key={message[4 ]} mid={message[4 ]} from_user={message[0]} to_user={chat_id} type={message[1]} value ={message[2]} 
-                time =       {message[3]} delete={deleteMessage} setMid={setMid } />
-                
-            ))}
+                <>
+                    { lastDate != dete &&
+                         
+
+                        <div className="fdate">{dete}</div>
+                    
+                    }
+                    <Message key={message[4 ]} mid={message[4 ]} from_user={message[0]} to_user={chat_id} type={message[1]} value ={message[2]} 
+                    time =       {message[3]} delete={deleteMessage} setMid={setMid } />
+                    
+                    <div style={ {display: "none"}}>
+                     { lastDate = dete  }
+                        
+                    </div>
+                </>
+                )
+        }
+            )}
                 {/* <Message mid={1} from_user={1} to_user={1} type={"text"} value={"Hey Koni!!!!!!!!!!!!!!!!!!!"} time={1712077050} /> */}
 
 
@@ -472,7 +496,8 @@ const AppHome = () => {
 
             
         </>
-    );
+    ) }
+    ;
     
     const [inChat, setInChat] = useState( !true ) 
     return (
