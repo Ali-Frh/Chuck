@@ -344,7 +344,7 @@ def get_mess(data):
         sq = conn.cursor()
         sq.execute(f"""
     Select fromuser, type, value, send_at, mid, replied_to, edited FROM messages WHERE (deleted IS NULL And ((chat_id='{user}' AND fromuser ='{peer}') OR 
-        (chat_id='{peer}' AND fromuser='{user}') )) ORDER BY send_at DESC LIMIT 10;                   
+        (chat_id='{peer}' AND fromuser='{user}') )) ORDER BY send_at DESC LIMIT 2;                   
  """)
         # print("hah", data)
         r = sq.fetchall()

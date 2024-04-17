@@ -88,6 +88,8 @@ const AppHome = () => {
         };
 
         useEffect(() => {
+
+
             const handleResize = () => {
               setWidth(window.innerWidth);
             };
@@ -141,25 +143,27 @@ const AppHome = () => {
           // scrollToBottom();
         }
 
-        if ( scrollTop < 20 && currentMessages.length > 9  ) {
+        if ( scrollTop < 20 
+             && currentMessages.length > 9 
+             ) {
             // console.log(1) 
             
             setTopLoader("show")
 
-            console.log( lastAsked)
+            // console.log( lastAsked)
             let id = currentMessages[currentMessages.length -1][4]
-            console.log(id)
+            // console.log(id)
             if (id != lastAsked) {
                 // p = scrollHeight
                 setLastOffs( scrollHeight)
                 // console.log(p + " => height")
+                setLastAsked(id)
                 setTimeout(() => {
 
                     // console.log("reqq")
                     socket.emit("getRest", JSON.stringify({"chat_id": chat_id, "mid": id, "direction": "UP" }))
                     setTopLoader("hide")
                 }, 700);
-                setLastAsked(id)
                 
             } else {setTopLoader("hide")}
 
@@ -199,7 +203,6 @@ const AppHome = () => {
         socket.on('connect', onConnect);
         socket.on('disconnect', onDisconnect);
 
-        socket.on("getMessages", loadMessages); 
         // socket.on('foo', onFooEvent);
         
         return () => {
@@ -208,16 +211,17 @@ const AppHome = () => {
             //   socket.off('foo', onFooEvent);
         };
     }, []);
+    socket.on("getMessages", loadMessages); 
     socket.on("openChat", openChatBlyat);
     socket.on("get_chats", onGetChats ); 
     
     
     const grest = (data) => {
-        console.log (data)
+        console.log ("grest"+ data)
         data = JSON.parse(data)
 
         console.log("stage 1=>"+chat_id)
-        if (data["chat_id"] == chat_id) {
+        if (data["chat_id"] == chat_id ) {
             
             let d = data["messages"]
             if (data["direction"] == "UP") {
@@ -382,6 +386,25 @@ const AppHome = () => {
                 // Update state by combining prev and filteredD
                 return [...prev, ...filteredD];
               });
+
+            //   setLastOffs( scrollHeight)
+            //     // console.log(p + " => height")
+                // setTimeout(() => {
+
+                    // console.log("reqq")
+                if ( lastAsked!= d[d.length -1 ][4] )  {
+
+                    socket.emit("getRest", JSON.stringify({
+                        "chat_id": data[ "chat_id"], "mid": d[d.length -1][4],
+                        "direction": "UP" }))
+                        console.log ("got")
+                        // setLastAsked
+                        setLastAsked(d[d.length -1 ][4]) 
+                        scrollToBottom();
+                        // setLastOffs(document.getElementsByClassName("messages")[0].scrollHeight - 50)
+                } 
+                    // setTopLoader("hide")
+                // }, 700);
               
             // setCurrentMessages(prev => ([...prev, ...d]));
         }
