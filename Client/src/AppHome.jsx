@@ -201,16 +201,16 @@ const AppHome = () => {
 
         socket.on("getMessages", loadMessages); 
         // socket.on('foo', onFooEvent);
-        socket.on("getRest", grest)
-    
+        
         return () => {
-          socket.off('connect', onConnect);
-          socket.off('disconnect', onDisconnect);
-        //   socket.off('foo', onFooEvent);
+            socket.off('connect', onConnect);
+            socket.off('disconnect', onDisconnect);
+            //   socket.off('foo', onFooEvent);
         };
     }, []);
     socket.on("openChat", openChatBlyat);
     socket.on("get_chats", onGetChats ); 
+    
     
     const grest = (data) => {
         console.log (data)
@@ -242,6 +242,8 @@ const AppHome = () => {
             }
         }
     }
+
+    socket.on("getRest", grest)
 
     const lastSeener = (data) => {
         data = JSON.parse(data)
