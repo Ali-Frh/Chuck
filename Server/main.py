@@ -305,6 +305,35 @@ def handle_disconnect():
         c.execute("UPDATE users SET last_seen=\""+str(time.time() * 1000 ) + "\" WHERE uid=\""+str(uid) + "\"; " )
         conn.commit()
 
+
+
+@socket.on("getRest")
+def get_rest(data):
+    data = json.loads(data)
+    user = conn_to_uid[request.sid]
+    peer = data["chat_id"]
+
+    if data["direction"] == "UP":
+        sql = f"""
+    Select fromuser, type, value, send_at, mid, replied_to, edited FROM messages WHERE (mid < {data["mid"]} and deleted IS NULL And ((chat_id='{user}' AND fromuser ='{peer}') OR 
+        (chat_id='{peer}' AND fromuser='{user}') )) ORDER BY send_at DESC LIMIT 10;                   
+ """
+
+
+# offset buddy
+    with sqlite3.connect("data.db") as conn:
+        sq = conn.cursor()
+        sq.execute(sql)
+        # print("hah", data)
+        r = sq.fetchall()
+        
+        r = {"chat_id": peer, "messages": r, "direction": data["direction"]}
+        
+        
+        emit("getRest", json.dumps (
+        r      ))
+        print("SENT")
+
 @socket.on("getMessages")
 def get_mess(data):
     data = json.loads(data)
@@ -315,7 +344,7 @@ def get_mess(data):
         sq = conn.cursor()
         sq.execute(f"""
     Select fromuser, type, value, send_at, mid, replied_to, edited FROM messages WHERE (deleted IS NULL And ((chat_id='{user}' AND fromuser ='{peer}') OR 
-        (chat_id='{peer}' AND fromuser='{user}') )) ORDER BY send_at DESC;                   
+        (chat_id='{peer}' AND fromuser='{user}') )) ORDER BY send_at DESC LIMIT 10;                   
  """)
         # print("hah", data)
         r = sq.fetchall()

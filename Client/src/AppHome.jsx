@@ -70,7 +70,14 @@ const AppHome = () => {
     const [addFriendShow, setAddFriendShow] = useState(false)
     const [width, setWidth] = useState(window. innerWidth)
     const [haveBadge, setHaveBadge] = useState([]); 
+    const [topLoader, setTopLoader ] = useState("hide")
+    const [lastAsked, setLastAsked] = useState(0)
+
     const [currentMid, setMid] = useState(0);
+    // var p = 0;
+    const [lastOffs, setLastOffs] = useState(0 )
+
+
     const scrollToBottom = () => {
         if (messagesEndRef.current) {
                 // const element = messagesEndRef.current;
@@ -126,19 +133,44 @@ const AppHome = () => {
         const atBottom = scrollHeight - scrollTop <= clientHeight + 20;
         if (atBottom) {
             setAtButt(true);
-            console.log("at butt")
-          // User is at the bottom
-          // Disable autoscroll
-          // Optionally, you could add a state to control autoscrolling
         } else {
             setAtButt(!true);
-            console.log("is not")
+            // console.log("is not" )
           // User is not at the bottom
           // Enable autoscroll
           // scrollToBottom();
         }
+
+        if ( scrollTop < 20 && currentMessages.length > 9  ) {
+            // console.log(1) 
+            
+            setTopLoader("show")
+
+            console.log( lastAsked)
+            let id = currentMessages[currentMessages.length -1][4]
+            console.log(id)
+            if (id != lastAsked) {
+                // p = scrollHeight
+                setLastOffs( scrollHeight)
+                // console.log(p + " => height")
+                setTimeout(() => {
+
+                    // console.log("reqq")
+                    socket.emit("getRest", JSON.stringify({"chat_id": chat_id, "mid": id, "direction": "UP" }))
+                    setTopLoader("hide")
+                }, 700);
+                setLastAsked(id)
+                
+            } else {setTopLoader("hide")}
+
+        } else {
+            setTopLoader("hide")
+        }
+
+
       };
 
+    
 
     const [Messages, setMessages] = useState({}); 
     // const [Talks, setTalks] = useState("");
@@ -169,6 +201,7 @@ const AppHome = () => {
 
         socket.on("getMessages", loadMessages); 
         // socket.on('foo', onFooEvent);
+        socket.on("getRest", grest)
     
         return () => {
           socket.off('connect', onConnect);
@@ -179,6 +212,37 @@ const AppHome = () => {
     socket.on("openChat", openChatBlyat);
     socket.on("get_chats", onGetChats ); 
     
+    const grest = (data) => {
+        console.log (data)
+        data = JSON.parse(data)
+
+        console.log("stage 1=>"+chat_id)
+        if (data["chat_id"] == chat_id) {
+            
+            let d = data["messages"]
+            if (data["direction"] == "UP") {
+                
+                console.log("12")
+                setCurrentMessages(prev => {
+                    // Filter out elements from d that are already present in prev
+                    const filteredD = d.filter(newMessage => !prev.some(existingMessage => existingMessage[3] === newMessage[3]));
+                  
+                    // Update state by combining prev and filteredD
+                    return [...prev, ...filteredD];
+                });
+                
+                setTimeout(()=> {
+
+                    let elem =  document.getElementsByClassName("messages")[0]
+                    let offs = elem.scrollHeight - lastOffs 
+                    console.log(offs+ " offs, elem sche=> "+elem.scrollHeight+ " la => " + lastOffs   )
+                    elem.scrollTo(0, offs) 
+                }, 100);
+
+            }
+        }
+    }
+
     const lastSeener = (data) => {
         data = JSON.parse(data)
         console.log(Chats)
@@ -283,6 +347,7 @@ const AppHome = () => {
         setCurrentMessages([]);
         setHaveBadge(prevState => prevState.filter(id => id !== +data["chat_id"]));
         scrollToBottom()
+        setLastAsked(0)
 
     }
 
@@ -461,7 +526,7 @@ const AppHome = () => {
         <>
             {/* Meow {chat_id} */}
             
-            {console.log( currentMessages)}
+            {/* {console.log( currentMessages)} */}
             {currentMessages && currentMessages.slice().reverse() .map((message, index) => { 
                 let d = new Date(message[3]* 1000 );
                 let dete = d.toLocaleString("en-us", {month: "long", day:"numeric"})
@@ -594,7 +659,8 @@ const AppHome = () => {
                         </div>
                     </div> 
                     <div className="chat-stage">
-                        <button style={{position: "absolute", top:0, right:0}} onClick={()=> {
+                        { topLoader == "show" &&  <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div> }
+                        <button style={{position: "absolute", top:0, right:0, display: "none"}} onClick={()=> {
                             // setCurrentMessages(prev=> ([...prev, ...prev])
                             console.log(chat_id)
                             
