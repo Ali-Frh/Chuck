@@ -235,13 +235,13 @@ const AppHome = () => {
                     return [...prev, ...filteredD];
                 });
                 
-                // setTimeout(()=> {
+                setTimeout(()=> {
 
-                //     let elem =  document.getElementsByClassName("messages")[0]
-                //     let offs = elem.scrollHeight - lastOffs 
-                //     console.log(offs+ " offs, elem sche=> "+elem.scrollHeight+ " la => " + lastOffs   )
-                //     elem.scrollTo(0, offs) 
-                // }, 0);
+                    let elem =  document.getElementsByClassName("messages")[0]
+                    let offs = elem.scrollHeight - lastOffs 
+                    console.log(offs+ " offs, elem sche=> "+elem.scrollHeight+ " la => " + lastOffs   )
+                    elem.scrollTo(0, offs) 
+                }, 0);
 
             }
         }
@@ -394,13 +394,13 @@ const AppHome = () => {
                     // console.log("reqq")
                 if ( lastAsked!= d[d.length -1 ][4] )  {
 
-                    socket.emit("getRest", JSON.stringify({
-                        "chat_id": data[ "chat_id"], "mid": d[d.length -1][4],
-                        "direction": "UP" }))
-                        console.log ("got")
-                        // setLastAsked
-                        setLastAsked(d[d.length -1 ][4]) 
-                        scrollToBottom();
+                    // socket.emit("getRest", JSON.stringify({
+                    //     "chat_id": data[ "chat_id"], "mid": d[d.length -1][4],
+                    //     "direction": "UP" }))
+                    //     console.log ("got")
+                    //     // setLastAsked
+                    //     setLastAsked(d[d.length -1 ][4]) 
+                    //     scrollToBottom();
                         // setLastOffs(document.getElementsByClassName("messages")[0].scrollHeight - 50)
                 } 
                     // setTopLoader("hide")
