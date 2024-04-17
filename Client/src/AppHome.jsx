@@ -237,7 +237,7 @@ const AppHome = () => {
                     let offs = elem.scrollHeight - lastOffs 
                     console.log(offs+ " offs, elem sche=> "+elem.scrollHeight+ " la => " + lastOffs   )
                     elem.scrollTo(0, offs) 
-                }, 100);
+                }, 0);
 
             }
         }
